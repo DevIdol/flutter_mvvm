@@ -22,7 +22,7 @@ jobs:
         uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
 
       - name: Use FVM and Setup Flutter
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+        uses: kuhnroyal/flutter-fvm-config-action@v2
         id: fvm-config-action
         with:
           path: '.fvmrc'
@@ -48,11 +48,26 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      - name: Run Build Runner for Code Generation
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-
       - name: Run Dart Format
         run: dart format .
 
       - name: Run Flutter analyze (lint)
         run: flutter analyze
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_PASSWORD" > keystore_password.txt
+          echo "$KEY_ALIAS" > key_alias.txt
+          echo "$KEY_PASSWORD" > key_password.txt
+          flutter build apk --release --build-name=1.0.0 --build-number=1 --release --dart-define=FLUTTER_WEB_AUTO_DETECT=true
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
