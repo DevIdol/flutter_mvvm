@@ -3,4 +3,5 @@ export 'constants/regxs.dart';
 export 'converters/address_con.dart';
 export 'converters/timestamp_con.dart';
 export 'extensions/datetime_extension.dart';
+export 'extensions/exception_msg.dart';
 export 'validators/validators.dart';

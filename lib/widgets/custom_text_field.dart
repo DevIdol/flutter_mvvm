@@ -7,6 +7,8 @@ class CustomTextField extends StatelessWidget {
   final bool isRequired;
   final String? Function(String?)? validator;
   final int? maxLength;
+  final bool isReadOnly;
+  final bool isEnabled;
 
   const CustomTextField({
     super.key,
@@ -16,11 +18,14 @@ class CustomTextField extends StatelessWidget {
     this.isRequired = false,
     this.validator,
     this.maxLength,
+    this.isReadOnly = false,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: isReadOnly,
       initialValue: initialValue,
       maxLength: maxLength,
       autocorrect: true,

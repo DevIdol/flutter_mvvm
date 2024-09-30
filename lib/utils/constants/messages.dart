@@ -7,7 +7,7 @@ class Messages {
   static String userSaveSuccess = 'User saved successfully!';
   static String saveUserBtnTxt = 'Save User';
   static String noUser = 'No users found.';
-  static String searchUser = 'Search users...';
+  static String searchUser = 'Search...';
   static String selectImg = 'Tap to select profile image';
   static String validateImgMsg = 'Please select a valid image';
 }

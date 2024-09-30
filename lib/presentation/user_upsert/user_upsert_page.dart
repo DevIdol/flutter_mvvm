@@ -59,6 +59,7 @@ class UserUpsertPage extends HookConsumerWidget {
                     onChanged: userUpsertViewModelNotifier.setEmail,
                     isRequired: true,
                     validator: emailValidator,
+                    isReadOnly: user != null ? true : false,
                   ),
                   const SizedBox(height: 10),
                   CustomTextField(

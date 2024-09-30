@@ -83,7 +83,7 @@ class UserUpsertViewModel extends StateNotifier<UserUpsertState> {
       await userRepository.upsertUser(userToSave);
     } catch (error) {
       logger.e('Error during upsert: $error');
-      throw Exception('Failed to save user: $error');
+      rethrow;
     }
   }
 

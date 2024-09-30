@@ -13,7 +13,7 @@ abstract class BaseUserRepository {
   Stream<User> getUser({required String userId});
   Future<void> upsertUser(User user);
   Future<void> deleteUser(String userId);
-    Future<String> uploadProfile({
+  Future<String> uploadProfile({
     required Uint8List picture,
     required String type,
   });
@@ -69,6 +69,18 @@ class UserRepositoryImpl implements BaseUserRepository {
   @override
   Future<void> upsertUser(User user) async {
     try {
+      // Check for duplicate email
+      final querySnapshot =
+          await _dbUser.where('email', isEqualTo: user.email).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final existingUser = querySnapshot.docs.first.data();
+        if (existingUser['id'] != user.id) {
+          throw Exception(
+              'The email ${user.email} is already in use by another user.');
+        }
+      }
+
       await _dbUser.doc(user.id).set(user.toJson());
     } on FirebaseException catch (error) {
       logger.e('Error upserting user: $error');
@@ -86,7 +98,7 @@ class UserRepositoryImpl implements BaseUserRepository {
     }
   }
 
-    @override
+  @override
   Future<String> uploadProfile({
     required Uint8List picture,
     required String type,

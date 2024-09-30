@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../provider/provider.dart';
 import '../../../utils/utils.dart';
+import '../../../widgets/widgets.dart';
 
 class ProfileImageSection extends StatelessWidget {
   final UserUpsertState state;
@@ -27,9 +28,7 @@ class ProfileImageSection extends StatelessWidget {
             final image = await viewModel.imageData();
             if (image == null) {
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(Messages.validateImgMsg)),
-                );
+                showSnackBar(context, Messages.validateImgMsg);
               }
             } else {
               viewModel.setImageData(image);

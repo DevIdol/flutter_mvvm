@@ -61,13 +61,9 @@ class UserListTile extends HookConsumerWidget {
       required BuildContext context}) async {
     try {
       userViewModel.deleteUser(userId: user.id!, profileUrl: user.profile!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User deleted successfully')),
-      );
+      showSnackBar(context, 'User deleted successfully');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete user: $e')),
-      );
+      showSnackBar(context, 'Failed to delete user: $e');
     }
   }
 }
