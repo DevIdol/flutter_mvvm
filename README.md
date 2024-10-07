@@ -22,6 +22,13 @@ or
 flutter pub run build_runner build --delete-conflicting-output
 ```
 
+## flutter_gen generator for image & font
+```
+dart pub global activate flutter_gen
+
+dart run build_runner build
+```
+
 ## Download APK File
 You can download the release APK file from the following link:
 

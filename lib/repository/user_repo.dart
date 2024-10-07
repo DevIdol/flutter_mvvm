@@ -1,6 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -9,112 +11,109 @@ import '../data/data.dart';
 
 abstract class BaseUserRepository {
   String get generateNewId;
-  Stream<List<User>> fetchUsers();
-  Stream<User> getUser({required String userId});
-  Future<void> upsertUser(User user);
-  Future<void> deleteUser(String userId);
-  Future<String> uploadProfile({
-    required Uint8List picture,
-    required String type,
-  });
+  Stream<auth.User?> authUserStream();
+  Future<void> create(String authUserId);
+  Future<void> updateProvider(User user);
+  Future<User?> getUser({required String userId});
+  Future<String> uploadProfile(Uint8List picture, String type);
   Future<void> deleteFromStorage(String url);
 }
 
-final userRepositoryProvider = Provider.autoDispose<UserRepositoryImpl>(
-  (ref) => UserRepositoryImpl(),
-);
+final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
+  return UserRepositoryImpl();
+});
 
 class UserRepositoryImpl implements BaseUserRepository {
-  final _dbUser = FirebaseFirestore.instance.collection('Users');
+  final _auth = auth.FirebaseAuth.instance;
+  final _userCollection = FirebaseFirestore.instance.collection('Users');
   final _storage = FirebaseStorage.instance;
 
   @override
-  String get generateNewId => _dbUser.doc().id;
+  String get generateNewId => _userCollection.doc().id;
 
   @override
-  Stream<List<User>> fetchUsers() {
-    try {
-      final snapshotData =
-          _dbUser.orderBy('createdAt', descending: true).snapshots();
+  Stream<auth.User?> authUserStream() => _auth.authStateChanges();
 
-      return snapshotData.map((snapshot) {
-        return snapshot.docs.map((doc) {
-          final data = doc.data();
-          return User.fromJson(data);
-        }).toList();
-      });
-    } on FirebaseException catch (error) {
-      logger.e('Error fetching users: $error');
-      return Stream.error('Failed to fetch users');
+  @override
+  Future<User?> getUser({required String userId}) async {
+    final doc = await _userCollection.doc(userId).get();
+    if (doc.exists) {
+      return User.fromJson(doc.data()!);
+    } else {
+      return null;
     }
   }
 
   @override
-  Stream<User> getUser({required String userId}) {
-    return _dbUser.doc(userId).snapshots().handleError((dynamic error) {
-      if (error is FirebaseException) {
-        throw Exception('Error retrieving user data from Firebase.');
-      } else {
-        throw Exception('An unknown error occurred.');
-      }
-    }).map((snapshot) {
-      if (snapshot.exists && snapshot.data() != null) {
-        return User.fromJson(snapshot.data()!);
-      } else {
-        throw Exception('User with ID "$userId" not found.');
-      }
-    });
+  Future<void> create(String authUserId) async {
+    final currentUser = _auth.currentUser!;
+    final userProviderData = UserProviderData(
+      userName: currentUser.displayName ?? '',
+      email: currentUser.email!,
+      providerType: currentUser.providerData.first.providerId == 'password'
+          ? 'email/password'
+          : currentUser.providerData.first.providerId,
+      uid: currentUser.providerData.first.uid!,
+    );
+
+    final newUser = User(
+      id: authUserId,
+      profile: '',
+      address: Address(name: '', location: ''),
+      providerData: [userProviderData],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    await _userCollection.doc(authUserId).set(newUser.toJson());
   }
 
   @override
-  Future<void> upsertUser(User user) async {
-    try {
-      // Check for duplicate email
-      final querySnapshot =
-          await _dbUser.where('email', isEqualTo: user.email).get();
+  Future<void> updateProvider(User user) async {
+    final currentUser = _auth.currentUser!;
+    final providerType = currentUser.providerData.first.providerId;
+    final providerList = user.providerData ?? [];
 
-      if (querySnapshot.docs.isNotEmpty) {
-        final existingUser = querySnapshot.docs.first.data();
-        if (existingUser['id'] != user.id) {
-          throw Exception(
-              'The email ${user.email} is already in use by another user.');
-        }
-      }
+    final providerExists = providerList.any((provider) =>
+        provider.providerType ==
+        (providerType == 'password' ? 'email/password' : providerType));
 
-      await _dbUser.doc(user.id).set(user.toJson());
-    } on FirebaseException catch (error) {
-      logger.e('Error upserting user: $error');
-      throw Exception('Failed to upsert user: ${error.message}');
+    if (!providerExists) {
+      final newProviderData = UserProviderData(
+        userName: currentUser.displayName ?? '',
+        email: currentUser.email!,
+        providerType:
+            providerType == 'password' ? 'email/password' : providerType,
+        uid: currentUser.providerData.first.uid!,
+      );
+
+      final updatedUser = user.copyWith(
+        providerData: [...providerList, newProviderData],
+        updatedAt: DateTime.now(),
+      );
+      await _userCollection.doc(user.id).set(updatedUser.toJson());
     }
   }
 
   @override
-  Future<void> deleteUser(String userId) async {
+  Future<String> uploadProfile(Uint8List picture, String type) async {
     try {
-      await _dbUser.doc(userId).delete();
-    } on FirebaseException catch (error) {
-      logger.e('Error deleting user: $error');
-      throw Exception('Failed to delete user: ${error.message}');
+      final pictureId = const Uuid().v4();
+      final storageRef = _storage.ref('profiles/$pictureId.$type');
+      await storageRef.putData(picture);
+      return await storageRef.getDownloadURL();
+    } catch (e) {
+      logger.e('⚡ ERROR in uploadProfile: $e');
+      rethrow;
     }
-  }
-
-  @override
-  Future<String> uploadProfile({
-    required Uint8List picture,
-    required String type,
-  }) async {
-    final pictureId = const Uuid().v4();
-    final storageRef = _storage.ref().child('profiles/$pictureId.$type');
-    await storageRef.putData(picture);
-    return storageRef.getDownloadURL();
   }
 
   @override
   Future<void> deleteFromStorage(String url) async {
     try {
       await _storage.refFromURL(url).delete();
-    } catch (_) {
-      return;
+    } catch (e) {
+      logger.e('⚡ ERROR in deleteFromStorage: $e');
     }
   }
 }

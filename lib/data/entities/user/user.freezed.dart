@@ -21,13 +21,12 @@ User _$UserFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$User {
   String? get id => throw _privateConstructorUsedError;
-  String get firstName => throw _privateConstructorUsedError;
-  String get lastName => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
-  String? get password => throw _privateConstructorUsedError;
   String? get profile => throw _privateConstructorUsedError;
   @NullableAddressConverters()
   Address? get address => throw _privateConstructorUsedError;
+  @UserProviderDataConverter()
+  List<UserProviderData>? get providerData =>
+      throw _privateConstructorUsedError;
   @TimestampConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @TimestampConverter()
@@ -49,12 +48,9 @@ abstract class $UserCopyWith<$Res> {
   @useResult
   $Res call(
       {String? id,
-      String firstName,
-      String lastName,
-      String email,
-      String? password,
       String? profile,
       @NullableAddressConverters() Address? address,
+      @UserProviderDataConverter() List<UserProviderData>? providerData,
       @TimestampConverter() DateTime createdAt,
       @TimestampConverter() DateTime updatedAt});
 
@@ -77,12 +73,9 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
   @override
   $Res call({
     Object? id = freezed,
-    Object? firstName = null,
-    Object? lastName = null,
-    Object? email = null,
-    Object? password = freezed,
     Object? profile = freezed,
     Object? address = freezed,
+    Object? providerData = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -90,22 +83,6 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      firstName: null == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: freezed == password
-          ? _value.password
-          : password // ignore: cast_nullable_to_non_nullable
               as String?,
       profile: freezed == profile
           ? _value.profile
@@ -115,6 +92,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
               as Address?,
+      providerData: freezed == providerData
+          ? _value.providerData
+          : providerData // ignore: cast_nullable_to_non_nullable
+              as List<UserProviderData>?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -150,12 +131,9 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
   @useResult
   $Res call(
       {String? id,
-      String firstName,
-      String lastName,
-      String email,
-      String? password,
       String? profile,
       @NullableAddressConverters() Address? address,
+      @UserProviderDataConverter() List<UserProviderData>? providerData,
       @TimestampConverter() DateTime createdAt,
       @TimestampConverter() DateTime updatedAt});
 
@@ -176,12 +154,9 @@ class __$$UserImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = freezed,
-    Object? firstName = null,
-    Object? lastName = null,
-    Object? email = null,
-    Object? password = freezed,
     Object? profile = freezed,
     Object? address = freezed,
+    Object? providerData = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -189,22 +164,6 @@ class __$$UserImplCopyWithImpl<$Res>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      firstName: null == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: freezed == password
-          ? _value.password
-          : password // ignore: cast_nullable_to_non_nullable
               as String?,
       profile: freezed == profile
           ? _value.profile
@@ -214,6 +173,10 @@ class __$$UserImplCopyWithImpl<$Res>
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
               as Address?,
+      providerData: freezed == providerData
+          ? _value._providerData
+          : providerData // ignore: cast_nullable_to_non_nullable
+              as List<UserProviderData>?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -231,14 +194,12 @@ class __$$UserImplCopyWithImpl<$Res>
 class _$UserImpl implements _User {
   _$UserImpl(
       {this.id,
-      required this.firstName,
-      required this.lastName,
-      required this.email,
-      this.password,
       this.profile,
       @NullableAddressConverters() this.address,
+      @UserProviderDataConverter() final List<UserProviderData>? providerData,
       @TimestampConverter() required this.createdAt,
-      @TimestampConverter() required this.updatedAt});
+      @TimestampConverter() required this.updatedAt})
+      : _providerData = providerData;
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -246,18 +207,21 @@ class _$UserImpl implements _User {
   @override
   final String? id;
   @override
-  final String firstName;
-  @override
-  final String lastName;
-  @override
-  final String email;
-  @override
-  final String? password;
-  @override
   final String? profile;
   @override
   @NullableAddressConverters()
   final Address? address;
+  final List<UserProviderData>? _providerData;
+  @override
+  @UserProviderDataConverter()
+  List<UserProviderData>? get providerData {
+    final value = _providerData;
+    if (value == null) return null;
+    if (_providerData is EqualUnmodifiableListView) return _providerData;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   @override
   @TimestampConverter()
   final DateTime createdAt;
@@ -267,7 +231,7 @@ class _$UserImpl implements _User {
 
   @override
   String toString() {
-    return 'User(id: $id, firstName: $firstName, lastName: $lastName, email: $email, password: $password, profile: $profile, address: $address, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, profile: $profile, address: $address, providerData: $providerData, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -276,15 +240,10 @@ class _$UserImpl implements _User {
         (other.runtimeType == runtimeType &&
             other is _$UserImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.firstName, firstName) ||
-                other.firstName == firstName) &&
-            (identical(other.lastName, lastName) ||
-                other.lastName == lastName) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.password, password) ||
-                other.password == password) &&
             (identical(other.profile, profile) || other.profile == profile) &&
             (identical(other.address, address) || other.address == address) &&
+            const DeepCollectionEquality()
+                .equals(other._providerData, _providerData) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -293,8 +252,8 @@ class _$UserImpl implements _User {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, firstName, lastName, email,
-      password, profile, address, createdAt, updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, profile, address,
+      const DeepCollectionEquality().hash(_providerData), createdAt, updatedAt);
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -315,12 +274,9 @@ class _$UserImpl implements _User {
 abstract class _User implements User {
   factory _User(
       {final String? id,
-      required final String firstName,
-      required final String lastName,
-      required final String email,
-      final String? password,
       final String? profile,
       @NullableAddressConverters() final Address? address,
+      @UserProviderDataConverter() final List<UserProviderData>? providerData,
       @TimestampConverter() required final DateTime createdAt,
       @TimestampConverter() required final DateTime updatedAt}) = _$UserImpl;
 
@@ -329,18 +285,13 @@ abstract class _User implements User {
   @override
   String? get id;
   @override
-  String get firstName;
-  @override
-  String get lastName;
-  @override
-  String get email;
-  @override
-  String? get password;
-  @override
   String? get profile;
   @override
   @NullableAddressConverters()
   Address? get address;
+  @override
+  @UserProviderDataConverter()
+  List<UserProviderData>? get providerData;
   @override
   @TimestampConverter()
   DateTime get createdAt;
