@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../presentation/presentation.dart';
 import '../provider/provider.dart';
 import '../utils/utils.dart';
-import 'logger.dart';
 
 class MyApp extends HookConsumerWidget {
   const MyApp({super.key});
@@ -24,8 +23,7 @@ class MyApp extends HookConsumerWidget {
       debugShowCheckedModeBanner: false,
       home: authUserStream.when(
         data: (user) {
-          logger.e("User: $user");
-          if (user != null) {
+          if (user != null && user.emailVerified) {
             useEffect(() {
               authStateNotifier.getUser(authUserId: user.uid);
               return null;

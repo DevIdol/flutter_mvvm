@@ -1,9 +1,15 @@
 extension FormattedMessage on Exception {
   String get getMessage {
-    if (toString().startsWith("Exception: ")) {
-      return toString().substring(11);
-    } else {
-      return toString();
+    final message = toString();
+    
+    if (message.contains(']')) {
+      return message.split(']').last.trim();
+    } 
+    
+    if (message.startsWith("Exception: ")) {
+      return message.substring(11);
     }
+    
+    return message;
   }
 }

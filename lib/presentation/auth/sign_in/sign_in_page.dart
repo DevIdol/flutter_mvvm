@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../config/config.dart';
 import '../../../provider/provider.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/widgets.dart';
@@ -110,7 +109,6 @@ class SignInPage extends HookConsumerWidget {
                             ref
                                 .watch(loadingProvider.notifier)
                                 .update((state) => false);
-                            logger.e("Login FAild: ${e.getMessage}");
                             showSnackBar(context, e.getMessage);
                           }
                         }

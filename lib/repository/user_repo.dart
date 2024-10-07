@@ -46,7 +46,8 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   Future<void> create(String authUserId) async {
-    final currentUser = _auth.currentUser!;
+    final currentUser = _auth.currentUser;
+    if(currentUser == null) return;
     final userProviderData = UserProviderData(
       userName: currentUser.displayName ?? '',
       email: currentUser.email!,

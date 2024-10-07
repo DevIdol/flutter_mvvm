@@ -19,7 +19,7 @@ fvm use 3.24.3
 ```shell
 fvm flutter pub run build_runner build --delete-conflicting-outputs
 or 
-flutter pub run build_runner build --delete-conflicting-output
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ## flutter_gen generator for image & font
