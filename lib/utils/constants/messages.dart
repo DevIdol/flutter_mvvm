@@ -10,4 +10,6 @@ class Messages {
   static String searchUser = 'Search...';
   static String selectImg = 'Tap to select profile image';
   static String validateImgMsg = 'Please select a valid image';
+  static String logoutAlertMsg = 'Are you sure to logout?';
+  static String deleteAccAlertMsg = 'Are you sure to delete your account?';
 }

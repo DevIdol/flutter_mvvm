@@ -14,8 +14,9 @@ abstract class BaseUserRepository {
   Stream<auth.User?> authUserStream();
   Future<void> create(String authUserId);
   Future<void> updateProvider(User user);
-  Future<User?> getUser({required String userId});
-  Future<String> uploadProfile(Uint8List picture, String type);
+  Stream<User?> getUser({required String userId});
+  Future<void> signOut();
+  Future<String> uploadProfile({required Uint8List picture, required String type});
   Future<void> deleteFromStorage(String url);
 }
 
@@ -34,14 +35,15 @@ class UserRepositoryImpl implements BaseUserRepository {
   @override
   Stream<auth.User?> authUserStream() => _auth.authStateChanges();
 
-  @override
-  Future<User?> getUser({required String userId}) async {
-    final doc = await _userCollection.doc(userId).get();
-    if (doc.exists) {
-      return User.fromJson(doc.data()!);
-    } else {
-      return null;
-    }
+@override
+  Stream<User?> getUser({required String userId}) {
+    return _userCollection.doc(userId).snapshots().map((doc) {
+      if (doc.exists) {
+        return User.fromJson(doc.data()!);
+      } else {
+        return null;
+      }
+    });
   }
 
   @override
@@ -96,8 +98,20 @@ class UserRepositoryImpl implements BaseUserRepository {
     }
   }
 
+
+  // Sign out user
   @override
-  Future<String> uploadProfile(Uint8List picture, String type) async {
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      logger.e('⚡ ERROR in signOut: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> uploadProfile({required Uint8List picture, required String type}) async {
     try {
       final pictureId = const Uuid().v4();
       final storageRef = _storage.ref('profiles/$pictureId.$type');

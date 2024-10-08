@@ -100,10 +100,6 @@ class SignInPage extends HookConsumerWidget {
                             ref
                                 .watch(loadingProvider.notifier)
                                 .update((state) => false);
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => const HomePage()),
-                            );
                           } on Exception catch (e) {
                             if (!context.mounted) return;
                             ref

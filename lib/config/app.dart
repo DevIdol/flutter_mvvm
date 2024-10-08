@@ -29,7 +29,9 @@ class MyApp extends HookConsumerWidget {
               return null;
             }, [user]);
 
-            return const HomePage();
+            return HomePage(
+              userId: user.uid,
+            );
           } else {
             return const SignInPage();
           }

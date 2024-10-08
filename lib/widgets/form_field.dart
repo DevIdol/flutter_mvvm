@@ -18,12 +18,12 @@ Widget commonTextFormField(
     obscureText: obscureText,
     keyboardType: keyboardType,
     validator: validator,
-    decoration: _inputDecoration(labelText, obscureText, onTogglePassword),
+    decoration: inputDecoration(labelText, obscureText, onTogglePassword),
   );
 }
 
 /// Builds the InputDecoration for the text field
-InputDecoration _inputDecoration(
+InputDecoration inputDecoration(
     String labelText, bool obscureText, ValueChanged<bool>? onTogglePassword) {
   return InputDecoration(
     counterText: '',

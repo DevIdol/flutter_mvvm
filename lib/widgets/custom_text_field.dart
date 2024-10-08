@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm/widgets/widgets.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
@@ -9,6 +10,8 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final bool isReadOnly;
   final bool isEnabled;
+  final bool obscureText;
+  final ValueChanged<bool>? onTogglePassword;
 
   const CustomTextField({
     super.key,
@@ -20,6 +23,8 @@ class CustomTextField extends StatelessWidget {
     this.maxLength,
     this.isReadOnly = false,
     this.isEnabled = true,
+    this.obscureText = false,
+    this.onTogglePassword
   });
 
   @override
@@ -29,7 +34,7 @@ class CustomTextField extends StatelessWidget {
       initialValue: initialValue,
       maxLength: maxLength,
       autocorrect: true,
-      decoration: InputDecoration(labelText: label),
+      decoration: inputDecoration(label, obscureText, onTogglePassword),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       onChanged: onChanged,
       validator: validator ??

@@ -37,7 +37,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       await CurrentProviderSetting().update(providerId: 'password');
 
       // Sign out after successful sign-up(to email verification)
-      await signOut();
+      await _userRepository.signOut();
     } catch (e) {
       logger.e('⚡ ERROR in signUp: $e');
       rethrow;
@@ -57,7 +57,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
       // Ensure email is verified
       if (!userCredential.user!.emailVerified) {
-        await signOut();
+        await _userRepository.signOut();
         throw auth.FirebaseAuthException(
           code: 'email-not-verified',
           message: 'Please verify your email before signing in.',
@@ -70,26 +70,17 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   // Fetch or create user profile in the database
-  Future<void> getUser({required String authUserId}) async {
-    final user = await _userRepository.getUser(userId: authUserId);
-    if (user == null) {
-      await _userRepository.create(authUserId);
-      final newUser = await _userRepository.getUser(userId: authUserId);
-      state = state.copyWith(user: newUser);
-    } else {
-      await _userRepository.updateProvider(user);
-      state = state.copyWith(user: user);
-    }
-  }
-
-  // Sign out user
-  Future<void> signOut() async {
-    try {
-      await _auth.signOut();
-    } catch (e) {
-      logger.e('⚡ ERROR in signOut: $e');
-      rethrow;
-    }
+  Stream<void> getUser({required String authUserId}) {
+    return _userRepository.getUser(userId: authUserId).map((user) async {
+      if (user == null) {
+        await _userRepository.create(authUserId);
+        final newUser = await _userRepository.getUser(userId: authUserId).first;
+        state = state.copyWith(user: newUser);
+      } else {
+        await _userRepository.updateProvider(user);
+        state = state.copyWith(user: user);
+      }
+    });
   }
 
   // Update user profile

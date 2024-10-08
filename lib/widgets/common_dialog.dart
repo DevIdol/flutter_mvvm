@@ -16,18 +16,36 @@ Future<void> showConfirmDialog({
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(message),
+        title: Text(
+          message,
+          style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkColor),
+        ),
         actions: <Widget>[
           TextButton(
-            child: const Text('OK'),
+            child: const Text(
+              'CANCEL',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.errorColor),
+            ),
             onPressed: () {
-              okFunction!();
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('CANCEL'),
+            child: const Text(
+              'OK',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor),
+            ),
             onPressed: () {
+              okFunction!();
               Navigator.of(context).pop();
             },
           ),
