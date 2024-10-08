@@ -123,7 +123,7 @@ Future<bool> showMailConfirmationBox(
                     'Please check your inbox and click the link in the email to verify your account and complete the registration. '
                     'You must do this within 72 hours.',
                     style:
-                        commonStyle(13, FontWeight.w200, AppColors.darkColor),
+                        commonStyle(14, FontWeight.w500, AppColors.darkColor),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -136,7 +136,7 @@ Future<bool> showMailConfirmationBox(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         foregroundColor: AppColors.goldColor,
-                        backgroundColor: AppColors.darkColor,
+                        backgroundColor: AppColors.primaryColor,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(100),
