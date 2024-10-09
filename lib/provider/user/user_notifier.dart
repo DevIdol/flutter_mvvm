@@ -11,7 +11,7 @@ import 'user_state.dart';
 
 final userProviderStream = StreamProvider.family<User?, String>((ref, userId) {
   final userRepository = ref.watch(userRepositoryProvider);
-  return userRepository.getUser(userId: userId);
+  return userRepository.getUserStream(userId: userId);
 });
 
 final userNotifierProvider = StateNotifierProvider.autoDispose
@@ -36,6 +36,10 @@ class UserNotifier extends StateNotifier<UserEditState> {
   final User? user;
   final BaseUserRepository userRepository;
 
+  void setUserId(String userId) {
+    state = state.copyWith(id: userId);
+  }
+
   void setUserName(String userName) {
     state = state.copyWith(userName: userName);
   }
@@ -59,6 +63,59 @@ class UserNotifier extends StateNotifier<UserEditState> {
 
   void setImageData(Uint8List data) {
     state = state.copyWith(imageData: data);
+  }
+
+// update username
+  Future<void> updateUsername() async {
+    if (state.id!.isEmpty || state.userName.isEmpty) return;
+    try {
+      await userRepository.updateUsername(
+          userId: state.id!, newUsername: state.userName.trim());
+      if (mounted) {
+        state = state.copyWith(
+          userName: state.userName,
+        );
+        logger.d('Username updated successfully');
+      }
+    } catch (error) {
+      logger.e('Error updating username: $error');
+      rethrow;
+    }
+  }
+
+// change password
+  Future<void> changePassword(
+      {required String oldPassword, required String newPassword}) async {
+    try {
+      await userRepository.changePassword(
+          oldPassword: oldPassword.trim(), newPassword: newPassword.trim());
+      logger.d('Password changed successfully');
+    } catch (error) {
+      logger.e('Error changing password: $error');
+      rethrow;
+    }
+  }
+
+// update address
+  Future<void> updateAddress() async {
+    if (state.id!.isEmpty || state.address == null) return;
+    try {
+      final updatedAddress = state.address!;
+      await userRepository.updateUserAddress(
+        userId: state.id!,
+        addressName: updatedAddress.name.trim(),
+        addressLocation: updatedAddress.location.trim(),
+      );
+      if (mounted) {
+        state = state.copyWith(
+          address: updatedAddress,
+        );
+        logger.d('Address updated successfully');
+      }
+    } catch (error) {
+      logger.e('Error updating address: $error');
+      rethrow;
+    }
   }
 
   Future<Uint8List?> imageData() async {

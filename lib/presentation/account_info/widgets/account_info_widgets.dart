@@ -1,59 +1,100 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../config/config.dart';
 import '../../../data/data.dart';
+import '../../../provider/provider.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/widgets.dart';
 
-Widget buildProfileHeader(User userData) {
+Widget buildProfileHeader({
+  required BuildContext context,
+  required User userData,
+  required bool showOptions,
+  required VoidCallback onEditPressed,
+  required VoidCallback onUploadPressed,
+  required VoidCallback onRemovePressed,
+}) {
   return Center(
-    child: Column(
-      children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.grey[300],
-          child: userData.profile != null && userData.profile!.isNotEmpty
-              ? ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: userData.profile!,
-                    imageBuilder: (context, imageProvider) => CircleAvatar(
-                      radius: 50,
-                      backgroundImage: imageProvider,
+    child: SizedBox(
+      width: double.infinity,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.grey[300],
+                child: userData.profile != null && userData.profile!.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          userData.profile!,
+                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+              ),
+              Positioned(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: onEditPressed,
                     ),
-                    placeholder: (context, url) =>
-                        const CircularProgressIndicator(),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                  ),
-                )
-              : const Icon(
-                  Icons.person,
-                  size: 50,
-                  color: Colors.white,
+                    if (showOptions)
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.upload_file,
+                              color: Colors.white,
+                            ),
+                            onPressed: onUploadPressed,
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
+                            onPressed: onRemovePressed,
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          '${userData.providerData?.first.userName}',
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+              ),
+            ],
           ),
-        ),
-        // const SizedBox(height: 5),
-        Text(
-          userData.providerData!.first.email,
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppColors.darkColor,
+          const SizedBox(height: 10),
+          Text(
+            userData.providerData?.userName ?? 'User Name',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+          Text(
+            userData.providerData?.email ?? 'user@example.com',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black54,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
-
+// please create design like github profile change button, show only edit icon in the initial and when i click edit icon show upload and remove
 Widget buildUserInfoRow({
   required String title,
   Color? titleColor = AppColors.darkColor,
@@ -85,184 +126,160 @@ Widget buildUserInfoRow({
   );
 }
 
-// Dialog for change username
-Future<void> showEditUsernameDialog(
+/// Dialog for editing a single text field (eg: username)
+Future<void> showEditFieldDialog(
   BuildContext context, {
   required String label,
   required String initialValue,
   required void Function(String) onSave,
 }) {
-  String username = initialValue;
+  final formKey = GlobalKey<FormState>();
+  String value = initialValue;
 
-  return showDialog<void>(
+  return showCustomDialogForm(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(label),
-        content: CustomTextField(
-          label: label,
-          initialValue: initialValue,
-          onChanged: (value) => username = value,
-          isRequired: true,
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.errorColor),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-            ),
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.lightColor),
-            ),
-            onPressed: () {
-              if (username.isNotEmpty) {
-                onSave(username);
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ],
-      );
+    title: label,
+    content: Form(
+      key: formKey,
+      child: CustomTextField(
+        maxLength: 40,
+        label: label,
+        initialValue: initialValue,
+        onChanged: (newValue) => value = newValue,
+        isRequired: true,
+        validator: (newValue) {
+          if (newValue == null || newValue.isEmpty) {
+            return '$label is required.';
+          }
+          return null;
+        },
+      ),
+    ),
+    onSave: () async {
+      if (formKey.currentState?.validate() ?? false) {
+        onSave(value);
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      }
     },
   );
 }
 
-// Dialog for editing address (name and location)
+/// Dialog for editing address (name and location)
 Future<void> showEditAddressDialog(
   BuildContext context, {
   required String addressName,
   required String addressLocation,
   required void Function(String, String) onSave,
 }) {
+  final formKey = GlobalKey<FormState>();
   String name = addressName;
   String location = addressLocation;
 
-  return showDialog<void>(
+  return showCustomDialogForm(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Edit Address'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CustomTextField(
-              label: 'Address Name',
-              initialValue: addressName,
-              onChanged: (value) => name = value,
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              label: 'Address Location',
-              initialValue: addressLocation,
-              onChanged: (value) => location = value,
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.errorColor),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+    title: 'Edit Address',
+    content: Form(
+      key: formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(
+            maxLength: 40,
+            label: 'Address Name',
+            initialValue: addressName,
+            onChanged: (value) => name = value,
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-            ),
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.lightColor),
-            ),
-            onPressed: () {
-              onSave(name, location);
-              Navigator.of(context).pop();
-            },
+          const SizedBox(height: 16),
+          CustomTextField(
+            maxLength: 40,
+            label: 'Address Location',
+            initialValue: addressLocation,
+            onChanged: (value) => location = value,
           ),
         ],
-      );
+      ),
+    ),
+    onSave: () async {
+      if (formKey.currentState?.validate() ?? false) {
+        onSave(name, location);
+        Navigator.of(context).pop();
+      }
     },
   );
 }
 
-// Dialog for change password
-Future<void> showChangePasswordDialog(BuildContext context) {
+/// Dialog for change password
+Future<void> showChangePasswordDialog(
+    BuildContext context, UserNotifier userNotifier) {
+  final formKey = GlobalKey<FormState>();
+  String oldPassword = '';
   String newPassword = '';
-  String confirmPassword = '';
 
-  return showDialog<void>(
+  return showCustomDialogForm(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Change Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CustomTextField(
-              label: 'New Password',
-              initialValue: '',
-              onChanged: (value) => newPassword = value,
-              obscureText: true,
-              isRequired: true,
+    title: 'Change Password',
+    content: Form(
+      key: formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(
+            maxLength: 26,
+            label: 'Old Password',
+            initialValue: '',
+            onChanged: (value) => oldPassword = value,
+            obscureText: true,
+            isRequired: true,
+            validator: (value) => Validators.validateRequiredField(
+              value: value,
+              labelText: 'Old Password',
             ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              label: 'Confirm Password',
-              initialValue: '',
-              onChanged: (value) => confirmPassword = value,
-              obscureText: true,
-              isRequired: true,
-              validator: (value) {
-                if (value != newPassword) {
-                  return 'Passwords do not match';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+          const SizedBox(height: 16),
+          CustomTextField(
+            maxLength: 26,
+            label: 'New Password',
+            initialValue: '',
+            onChanged: (value) => newPassword = value,
+            obscureText: true,
+            isRequired: true,
+            validator: (value) => Validators.validatePassword(
+              value: value,
+              labelText: 'New Password',
             ),
-            child: const Text(
-              'Change Password',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.lightColor),
-            ),
-            onPressed: () {
-              if (newPassword.isNotEmpty && confirmPassword.isNotEmpty) {
-                if (newPassword == confirmPassword) {
-                  logger.i('New Password: $newPassword');
-                  Navigator.of(context).pop();
-                }
-              } 
+          ),
+          const SizedBox(height: 16),
+          CustomTextField(
+            maxLength: 26,
+            label: 'Confirm Password',
+            initialValue: '',
+            obscureText: true,
+            isRequired: true,
+            validator: (value) {
+              if (value != newPassword) {
+                return 'Passwords do not match.';
+              }
+              return null;
             },
+            onChanged: (String value) {},
           ),
         ],
-      );
+      ),
+    ),
+    onSave: () async {
+      if (formKey.currentState?.validate() ?? false) {
+        try {
+          await userNotifier.changePassword(
+              oldPassword: oldPassword, newPassword: newPassword);
+          if (!context.mounted) return;
+          Navigator.of(context).pop();
+          showSnackBar(context, Messages.passChangeSuccessMsg);
+        } on Exception catch (e) {
+          showSnackBar(context, e.getMessage);
+        }
+      }
     },
   );
 }

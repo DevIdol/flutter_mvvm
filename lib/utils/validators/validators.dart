@@ -30,7 +30,7 @@ class Validators {
       return '$labelText is required';
     }
     if (!Regxs.validatePassword(value)) {
-      return 'Password must have: 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special';
+      return 'Password must have: \nAt least 8+ characters, \nAt least 1 uppercase, 1 lowercase, \nAt least 1 number, 1 special';
     }
     return null;
   }

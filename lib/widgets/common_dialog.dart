@@ -7,6 +7,7 @@ import '../presentation/presentation.dart';
 import '../utils/utils.dart';
 import 'widgets.dart';
 
+// Show Alert confirmation Dialog
 Future<void> showConfirmDialog({
   required BuildContext context,
   required String message,
@@ -55,6 +56,7 @@ Future<void> showConfirmDialog({
   );
 }
 
+// Show SnackBar in bottom
 void showSnackBar(BuildContext context, String msg) {
   final Widget toastWithButton = Container(
     padding: const EdgeInsets.only(left: 19),
@@ -187,4 +189,85 @@ Future<bool> showMailConfirmationBox(
         },
       ) ??
       false;
+}
+
+/// Common Dialog Form template
+Future<void> showCustomDialogForm({
+  required BuildContext context,
+  required String title,
+  required Widget content,
+  required Future<void> Function() onSave,
+}) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      bool isLoading = false;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          final dialogWidth = screenWidth < 400 ? screenWidth * 0.98 : 400.0;
+
+          return AlertDialog(
+            title: Text(title),
+            content: SizedBox(
+              width: dialogWidth,
+              child: content,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        Navigator.of(context).pop();
+                      },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: AppColors.errorColor),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        setState(() => isLoading = true);
+                        try {
+                          await onSave();
+                        } on Exception catch (e) {
+                          if (context.mounted) {
+                            showSnackBar(context, e.getMessage);
+                          }
+                        } finally {
+                          if (context.mounted) {
+                            setState(() => isLoading = false);
+                          }
+                        }
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.lightColor,
+                        ),
+                      )
+                    : const Text(
+                        'Save',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.lightColor),
+                      ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }

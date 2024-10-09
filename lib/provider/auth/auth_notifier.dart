@@ -24,11 +24,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         password: password,
       );
 
-      // Update user display name
-      await _updateUserProfile(
-        userCredential.user!,
-        displayName: userName,
-      );
+      await userCredential.user!.updateDisplayName(userName);
 
       // Send email verification
       await userCredential.user?.sendEmailVerification();
@@ -70,26 +66,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   // Fetch or create user profile in the database
-  Stream<void> getUser({required String authUserId}) {
-    return _userRepository.getUser(userId: authUserId).map((user) async {
-      if (user == null) {
-        await _userRepository.create(authUserId);
-        final newUser = await _userRepository.getUser(userId: authUserId).first;
-        state = state.copyWith(user: newUser);
-      } else {
-        await _userRepository.updateProvider(user);
-        state = state.copyWith(user: user);
-      }
-    });
-  }
+  Future<void> getUserFuture({required String authUserId}) async {
+    final user = await _userRepository.getUserFuture(userId: authUserId);
 
-  // Update user profile
-  Future<void> _updateUserProfile(auth.User user, {String? displayName}) async {
-    try {
-      await user.updateDisplayName(displayName);
-    } catch (e) {
-      logger.e('⚡ ERROR in _updateUserProfile: $e');
-      rethrow;
+    if (user == null) {
+      await _userRepository.create(authUserId);
+      final newUser = await _userRepository.getUserFuture(userId: authUserId);
+      state = state.copyWith(user: newUser);
+    } else {
+      await _userRepository.updateProvider(user);
+      state = state.copyWith(user: user);
     }
   }
 }

@@ -25,7 +25,7 @@ class MyApp extends HookConsumerWidget {
         data: (user) {
           if (user != null && user.emailVerified) {
             useEffect(() {
-              authStateNotifier.getUser(authUserId: user.uid);
+              authStateNotifier.getUserFuture(authUserId: user.uid);
               return null;
             }, [user]);
 

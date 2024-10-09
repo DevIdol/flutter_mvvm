@@ -14,9 +14,20 @@ abstract class BaseUserRepository {
   Stream<auth.User?> authUserStream();
   Future<void> create(String authUserId);
   Future<void> updateProvider(User user);
-  Stream<User?> getUser({required String userId});
+  Future<User?> getUserFuture({required String userId});
+  Stream<User?> getUserStream({required String userId});
+  Future<void> updateUsername(
+      {required String userId, required String newUsername});
+  Future<void> changePassword(
+      {required String oldPassword, required String newPassword});
+  Future<void> updateUserAddress({
+    required String userId,
+    required String addressName,
+    required String addressLocation,
+  });
   Future<void> signOut();
-  Future<String> uploadProfile({required Uint8List picture, required String type});
+  Future<String> uploadProfile(
+      {required Uint8List picture, required String type});
   Future<void> deleteFromStorage(String url);
 }
 
@@ -26,7 +37,7 @@ final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
 
 class UserRepositoryImpl implements BaseUserRepository {
   final _auth = auth.FirebaseAuth.instance;
-  final _userCollection = FirebaseFirestore.instance.collection('Users');
+  final _userCollection = FirebaseFirestore.instance.collection('users');
   final _storage = FirebaseStorage.instance;
 
   @override
@@ -35,8 +46,8 @@ class UserRepositoryImpl implements BaseUserRepository {
   @override
   Stream<auth.User?> authUserStream() => _auth.authStateChanges();
 
-@override
-  Stream<User?> getUser({required String userId}) {
+  @override
+  Stream<User?> getUserStream({required String userId}) {
     return _userCollection.doc(userId).snapshots().map((doc) {
       if (doc.exists) {
         return User.fromJson(doc.data()!);
@@ -47,9 +58,19 @@ class UserRepositoryImpl implements BaseUserRepository {
   }
 
   @override
+  Future<User?> getUserFuture({required String userId}) async {
+    final doc = await _userCollection.doc(userId).get();
+    if (doc.exists) {
+      return User.fromJson(doc.data()!);
+    } else {
+      return null;
+    }
+  }
+
+  @override
   Future<void> create(String authUserId) async {
     final currentUser = _auth.currentUser;
-    if(currentUser == null) return;
+    if (currentUser == null) return;
     final userProviderData = UserProviderData(
       userName: currentUser.displayName ?? '',
       email: currentUser.email!,
@@ -98,6 +119,79 @@ class UserRepositoryImpl implements BaseUserRepository {
     }
   }
 
+  @override
+  Future<void> updateUsername({
+    required String userId,
+    required String newUsername,
+  }) async {
+    try {
+      final userDoc = await _userCollection.doc(userId).get();
+      final userData = userDoc.data() as Map<String, dynamic>;
+      List<dynamic> providerDataList = userData['providerData'] ?? [];
+
+      if (providerDataList.isNotEmpty) {
+        providerDataList[0]['userName'] = newUsername;
+      }
+
+      await _userCollection.doc(userId).update({
+        'providerData': providerDataList,
+        'updatedAt': DateTime.now(),
+      });
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        await currentUser.updateDisplayName(newUsername);
+      }
+    } catch (e) {
+      logger.e('⚡ ERROR updating username: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> changePassword(
+      {required String oldPassword, required String newPassword}) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      try {
+        String email = currentUser.email!;
+
+        // Re-authenticate the user
+        final credential = auth.EmailAuthProvider.credential(
+            email: email, password: oldPassword);
+        await currentUser.reauthenticateWithCredential(credential);
+        await currentUser.updatePassword(newPassword);
+        logger.d('Password updated successfully');
+      } catch (e) {
+        logger.e('Error updating password: $e');
+        rethrow;
+      }
+    } else {
+      throw auth.FirebaseAuthException(
+        code: 'user-not-logged-in',
+        message: 'No user is currently logged in.',
+      );
+    }
+  }
+
+// Update Address
+  @override
+  Future<void> updateUserAddress({
+    required String userId,
+    required String addressName,
+    required String addressLocation,
+  }) async {
+    try {
+      await _userCollection.doc(userId).update({
+        'address.name': addressName,
+        'address.location': addressLocation,
+        'updatedAt': DateTime.now(),
+      });
+      logger.d('Address updated successfully');
+    } catch (e) {
+      logger.e('⚡ ERROR updating address: $e');
+      rethrow;
+    }
+  }
 
   // Sign out user
   @override
@@ -111,7 +205,8 @@ class UserRepositoryImpl implements BaseUserRepository {
   }
 
   @override
-  Future<String> uploadProfile({required Uint8List picture, required String type}) async {
+  Future<String> uploadProfile(
+      {required Uint8List picture, required String type}) async {
     try {
       final pictureId = const Uuid().v4();
       final storageRef = _storage.ref('profiles/$pictureId.$type');

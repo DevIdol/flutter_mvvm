@@ -37,6 +37,7 @@ class CustomTextField extends StatelessWidget {
       decoration: inputDecoration(label, obscureText, onTogglePassword),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       onChanged: onChanged,
+      obscureText: obscureText,
       validator: validator ??
           (value) {
             if (isRequired && (value == null || value.isEmpty)) {

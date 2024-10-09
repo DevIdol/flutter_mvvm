@@ -12,4 +12,8 @@ class Messages {
   static String validateImgMsg = 'Please select a valid image';
   static String logoutAlertMsg = 'Are you sure to logout?';
   static String deleteAccAlertMsg = 'Are you sure to delete your account?';
+  static String passChangeSuccessMsg = 'Password changed successfully';
+  static String passChangeFailMsg = 'Failed to change password';
+  static String deleteProfileImgMsg =
+      'Are you sure to delete your profile image?';
 }

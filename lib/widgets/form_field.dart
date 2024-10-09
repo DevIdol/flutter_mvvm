@@ -38,6 +38,11 @@ InputDecoration inputDecoration(
     suffixIcon: labelText == 'Password'
         ? _buildPasswordToggleIcon(obscureText, onTogglePassword)
         : null,
+    errorStyle: const TextStyle(
+      color: AppColors.errorColor,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+    ),
   );
 }
 
