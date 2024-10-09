@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../config/config.dart';
@@ -76,6 +77,70 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     } else {
       await _userRepository.updateProvider(user);
       state = state.copyWith(user: user);
+    }
+  }
+
+  // google signin
+  Future<void> googleSignIn() async {
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser != null) {
+        final googleAuth = await googleUser.authentication;
+        final credential = auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await _auth.signInWithCredential(credential);
+        await CurrentProviderSetting().update(
+          providerId: 'google',
+        );
+      } else {
+        throw auth.FirebaseException(
+          plugin: 'firebase_auth',
+          code: 'select_one',
+        );
+      }
+    } on auth.FirebaseAuthException catch (e) {
+      logger.e('⚡ ERROR: $e');
+      rethrow;
+    }
+  }
+
+// delete account
+  Future<String?> deleteAccount(
+      {required String? password, required String profileUrl}) async {
+    try {
+      final currentUser = _auth.currentUser!;
+      final providerId = await CurrentProviderSetting().get() ?? '';
+      if (profileUrl.isNotEmpty) {
+        await _userRepository.deleteFromStorage(profileUrl);
+      }
+      if (providerId.contains('password')) {
+        await currentUser
+            .reauthenticateWithCredential(
+          auth.EmailAuthProvider.credential(
+            email: currentUser.email!,
+            password: password!,
+          ),
+        )
+            .then((value) {
+          _userRepository.signOut();
+          _userRepository.deleteUser(userId: value.user!.uid);
+          value.user!.delete();
+        });
+      } else {
+        if (providerId.contains('google')) {
+          final provider = auth.GoogleAuthProvider();
+          await currentUser.reauthenticateWithProvider(provider).then((value) {
+            _userRepository.signOut();
+            _userRepository.deleteUser(userId: value.user!.uid);
+            value.user!.delete();
+          });
+        }
+      }
+      return null;
+    } on auth.FirebaseAuthException catch (error) {
+      return error.message;
     }
   }
 }

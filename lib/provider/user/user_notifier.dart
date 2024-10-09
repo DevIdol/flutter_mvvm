@@ -44,9 +44,6 @@ class UserNotifier extends StateNotifier<UserEditState> {
     state = state.copyWith(userName: userName);
   }
 
-  void setNewPassword(String newPassword) {
-    state = state.copyWith(newPassword: newPassword);
-  }
 
   void setProfileUrl(String url) {
     state = state.copyWith(profile: url);
@@ -63,6 +60,40 @@ class UserNotifier extends StateNotifier<UserEditState> {
 
   void setImageData(Uint8List data) {
     state = state.copyWith(imageData: data);
+  }
+
+  // upload Profile
+  Future<void> uploadProfile() async {
+    try {
+      final url = await userRepository.uploadProfile(
+        picture: state.imageData!,
+        type: 'jpg',
+      );
+      setProfileUrl(url);
+      if(state.profile != null || state.profile!.isNotEmpty){
+      await userRepository.updateProfileUrl(
+          userId: state.id!, profileUrl: state.profile!);
+      }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+    // delete Profile
+  Future<void> deleteProfile() async {
+    try {
+      if(state.profile != null || state.profile!.isNotEmpty){
+      await userRepository.deleteFromStorage(state.profile!);
+      await userRepository.deleteProfileUrl(userId: state.id!);
+     if (mounted) {
+        state = state.copyWith(
+          profile: '',
+        );
+      }
+      }
+    } catch (_) {
+      rethrow;
+    }
   }
 
 // update username

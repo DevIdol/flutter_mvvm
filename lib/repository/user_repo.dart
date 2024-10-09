@@ -3,16 +3,26 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../config/config.dart';
 import '../data/data.dart';
+import '../utils/utils.dart';
 
 abstract class BaseUserRepository {
   String get generateNewId;
   Stream<auth.User?> authUserStream();
   Future<void> create(String authUserId);
+  Future<void> updateProfileUrl({
+    required String userId,
+    required String profileUrl,
+  });
+   Future<void> deleteUser({required String userId});
+  Future<void> deleteProfileUrl({
+    required String userId,
+  });
   Future<void> updateProvider(User user);
   Future<User?> getUserFuture({required String userId});
   Stream<User?> getUserStream({required String userId});
@@ -25,6 +35,7 @@ abstract class BaseUserRepository {
     required String addressName,
     required String addressLocation,
   });
+
   Future<void> signOut();
   Future<String> uploadProfile(
       {required Uint8List picture, required String type});
@@ -112,10 +123,44 @@ class UserRepositoryImpl implements BaseUserRepository {
       );
 
       final updatedUser = user.copyWith(
+        profile: currentUser.photoURL ?? '',
         providerData: [...providerList, newProviderData],
         updatedAt: DateTime.now(),
       );
       await _userCollection.doc(user.id).set(updatedUser.toJson());
+    }
+  }
+
+  @override
+  Future<void> updateProfileUrl({
+    required String userId,
+    required String profileUrl,
+  }) async {
+    try {
+      await _userCollection.doc(userId).update({
+        'profile': profileUrl,
+        'updatedAt': DateTime.now(),
+      });
+      logger.d('Profile URL updated successfully');
+    } catch (e) {
+      logger.e('⚡ ERROR updating profile URL: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteProfileUrl({
+    required String userId,
+  }) async {
+    try {
+      await _userCollection.doc(userId).update({
+        'profile': '',
+        'updatedAt': DateTime.now(),
+      });
+      logger.d('Profile URL updated successfully');
+    } catch (e) {
+      logger.e('⚡ ERROR updating profile URL: $e');
+      rethrow;
     }
   }
 
@@ -197,6 +242,10 @@ class UserRepositoryImpl implements BaseUserRepository {
   @override
   Future<void> signOut() async {
     try {
+      final providerId = await CurrentProviderSetting().get() ?? '';
+      if (providerId.contains('google')) {
+        await GoogleSignIn().signOut();
+      }
       await _auth.signOut();
     } catch (e) {
       logger.e('⚡ ERROR in signOut: $e');
@@ -214,6 +263,16 @@ class UserRepositoryImpl implements BaseUserRepository {
       return await storageRef.getDownloadURL();
     } catch (e) {
       logger.e('⚡ ERROR in uploadProfile: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteUser({required String userId}) async {
+    try {
+      await _userCollection.doc(userId).delete();
+    } catch (error) {
+      logger.e('Error deleting user: $error');
       rethrow;
     }
   }

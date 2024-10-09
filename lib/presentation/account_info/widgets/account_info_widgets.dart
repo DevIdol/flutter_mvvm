@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../data/data.dart';
@@ -26,8 +27,13 @@ Widget buildProfileHeader({
                 backgroundColor: Colors.grey[300],
                 child: userData.profile != null && userData.profile!.isNotEmpty
                     ? ClipOval(
-                        child: Image.network(
-                          userData.profile!,
+                        child: CachedNetworkImage(
+                          imageUrl: userData.profile!,
+                          placeholder: (context, url) => const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.error,
+                            size: 50,
+                          ),
                           fit: BoxFit.cover,
                           width: 100,
                           height: 100,
@@ -40,50 +46,93 @@ Widget buildProfileHeader({
                       ),
               ),
               Positioned(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        color: Colors.white,
-                      ),
-                      onPressed: onEditPressed,
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: onEditPressed,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    if (showOptions)
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.upload_file,
-                              color: Colors.white,
-                            ),
-                            onPressed: onUploadPressed,
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                            onPressed: onRemovePressed,
-                          ),
-                        ],
-                      ),
-                  ],
+                    child: const Icon(
+                      Icons.edit,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+          if (showOptions)
+            SizedBox(
+              width: userData.profile != null && userData.profile!.isNotEmpty
+                  ? 240
+                  : 120,
+              child: Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: onUploadPressed,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          'Upload a profile',
+                          style: TextStyle(
+                            color: AppColors.lightColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (userData.profile != null &&
+                        userData.profile!.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 20,
+                        width: 2,
+                        color: AppColors.lightColor,
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: onRemovePressed,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            'Remove profile',
+                            style: TextStyle(
+                              color: AppColors.lightColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 10),
           Text(
-            userData.providerData?.userName ?? 'User Name',
+            userData.providerData!.first.userName,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
-            userData.providerData?.email ?? 'user@example.com',
+            userData.providerData!.first.email,
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black54,
@@ -94,6 +143,7 @@ Widget buildProfileHeader({
     ),
   );
 }
+
 // please create design like github profile change button, show only edit icon in the initial and when i click edit icon show upload and remove
 Widget buildUserInfoRow({
   required String title,

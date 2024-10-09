@@ -13,8 +13,11 @@ class $AssetsIconsGen {
   /// File path: assets/icons/paper_plane.svg
   String get paperPlane => 'assets/icons/paper_plane.svg';
 
+  /// File path: assets/icons/social_google.svg
+  String get socialGoogle => 'assets/icons/social_google.svg';
+
   /// List of all assets
-  List<String> get values => [paperPlane];
+  List<String> get values => [paperPlane, socialGoogle];
 }
 
 class Assets {

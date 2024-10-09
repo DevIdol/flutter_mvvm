@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../assets/assets.gen.dart';
 import '../../../provider/provider.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/widgets.dart';
@@ -67,9 +69,7 @@ class SignInPage extends HookConsumerWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () {
-                          // Navigate to the reset password page
-                        },
+                        onTap: () {},
                         child: Text(
                           'Forgot your password?',
                           style: commonStyle(
@@ -120,6 +120,39 @@ class SignInPage extends HookConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                commonDivider(
+                  18,
+                  5,
+                  true,
+                ),
+                const Text('or'),
+                commonDivider(
+                  18,
+                  5,
+                  false,
+                ),
+              ],
+            ),
+             const SizedBox(height: 10),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              commonSocialBtn(
+                onPressed: () async {
+                  try {
+                    await authStateNotifier.googleSignIn();
+                  } on Exception catch (e) {
+                    if(!context.mounted) return;
+                    showSnackBar(context, e.getMessage);
+                  }
+                },
+                child: SvgPicture.asset(
+                  Assets.icons.socialGoogle,
+                ),
+              ),
+            ]),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () {

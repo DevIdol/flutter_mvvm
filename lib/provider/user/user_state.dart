@@ -13,8 +13,6 @@ class UserEditState with _$UserEditState {
     @Default('') String? id,
     @Default('') String userName,
     @Default('') String? profile,
-    @Default('') String newPassword,
-    @Default('') String confirmPassword,
     @NullableAddressConverters() Address? address,
     Uint8List? imageData,
   }) = _UserEditState;
