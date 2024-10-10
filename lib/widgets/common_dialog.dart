@@ -85,7 +85,7 @@ void showSnackBar(BuildContext context, String msg) {
             Icons.close,
             size: 20,
           ),
-          color: const Color(0xFFF61202),
+          color: AppColors.errorColor,
           onPressed: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
           },
