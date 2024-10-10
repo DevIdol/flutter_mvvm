@@ -44,7 +44,6 @@ class UserNotifier extends StateNotifier<UserEditState> {
     state = state.copyWith(userName: userName);
   }
 
-
   void setProfileUrl(String url) {
     state = state.copyWith(profile: url);
   }
@@ -63,33 +62,36 @@ class UserNotifier extends StateNotifier<UserEditState> {
   }
 
   // upload Profile
-  Future<void> uploadProfile() async {
+  Future<void> uploadProfile({required String oldProfileUrl}) async {
     try {
+      if (oldProfileUrl.isNotEmpty) {
+        await userRepository.deleteFromStorage(oldProfileUrl);
+      }
       final url = await userRepository.uploadProfile(
         picture: state.imageData!,
         type: 'jpg',
       );
       setProfileUrl(url);
-      if(state.profile != null || state.profile!.isNotEmpty){
-      await userRepository.updateProfileUrl(
-          userId: state.id!, profileUrl: state.profile!);
+      if (state.profile != null || state.profile!.isNotEmpty) {
+        await userRepository.updateProfileUrl(
+            userId: state.id!, profileUrl: state.profile!);
       }
     } catch (_) {
       rethrow;
     }
   }
 
-    // delete Profile
+  // delete Profile
   Future<void> deleteProfile() async {
     try {
-      if(state.profile != null || state.profile!.isNotEmpty){
-      await userRepository.deleteFromStorage(state.profile!);
-      await userRepository.deleteProfileUrl(userId: state.id!);
-     if (mounted) {
-        state = state.copyWith(
-          profile: '',
-        );
-      }
+      if (state.profile != null || state.profile!.isNotEmpty) {
+        await userRepository.deleteFromStorage(state.profile!);
+        await userRepository.deleteProfileUrl(userId: state.id!);
+        if (mounted) {
+          state = state.copyWith(
+            profile: '',
+          );
+        }
       }
     } catch (_) {
       rethrow;

@@ -38,7 +38,7 @@ class AccountInfoPage extends HookConsumerWidget {
 
       try {
         userNotifier.setImageData(image);
-        await userNotifier.uploadProfile();
+        await userNotifier.uploadProfile(oldProfileUrl: user.profile ?? '');
         ref.watch(loadingProvider.notifier).update((state) => false);
         showOptions.value = false;
         if (context.mounted) {

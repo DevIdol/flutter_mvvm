@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 
 import '../../../data/data.dart';
@@ -14,6 +15,17 @@ Widget buildProfileHeader({
   required VoidCallback onUploadPressed,
   required VoidCallback onRemovePressed,
 }) {
+  final currentUser = auth.FirebaseAuth.instance.currentUser;
+  final providerDataUid = currentUser?.providerData.first.uid;
+  // Find the provider data based on the UID
+  UserProviderData? userProvider;
+  if (providerDataUid != null && userData.providerData != null) {
+    userProvider = userData.providerData!.firstWhere(
+      (provider) => provider.uid == providerDataUid,
+      orElse: () => const UserProviderData(),
+    );
+  }
+
   return Center(
     child: SizedBox(
       width: double.infinity,
@@ -29,21 +41,31 @@ Widget buildProfileHeader({
                     ? ClipOval(
                         child: CachedNetworkImage(
                           imageUrl: userData.profile!,
-                          placeholder: (context, url) => const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.error,
-                            size: 50,
-                          ),
+                          placeholder: (context, url) =>
+                              const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error, size: 50),
                           fit: BoxFit.cover,
                           width: 100,
                           height: 100,
                         ),
                       )
-                    : const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.white,
-                      ),
+                    : userProvider?.photoUrl != null &&
+                            userProvider!.photoUrl.isNotEmpty
+                        ? ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: userProvider.photoUrl,
+                              placeholder: (context, url) =>
+                                  const CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error, size: 50),
+                              fit: BoxFit.cover,
+                              width: 100,
+                              height: 100,
+                            ),
+                          )
+                        : const Icon(Icons.person,
+                            size: 50, color: Colors.white),
               ),
               Positioned(
                 bottom: 0,
@@ -125,14 +147,14 @@ Widget buildProfileHeader({
             ),
           const SizedBox(height: 10),
           Text(
-            userData.providerData!.first.userName,
+            userProvider?.userName ?? 'Unknown User',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
-            userData.providerData!.first.email,
+            userProvider?.email ?? 'Unknown Email',
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black54,

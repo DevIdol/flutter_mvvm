@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -97,6 +100,18 @@ class SignInPage extends HookConsumerWidget {
                               passwordInputController.text,
                             );
                             if (!context.mounted) return;
+                            final authUser = FirebaseAuth.instance.currentUser;
+                            Timer(
+                              const Duration(milliseconds: 500),
+                              () async => Navigator.of(context)
+                                  .pushAndRemoveUntil<void>(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      HomePage(userId: authUser!.uid),
+                                ),
+                                (route) => false,
+                              ),
+                            );
                             ref
                                 .watch(loadingProvider.notifier)
                                 .update((state) => false);
@@ -137,14 +152,14 @@ class SignInPage extends HookConsumerWidget {
                 ),
               ],
             ),
-             const SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               commonSocialBtn(
                 onPressed: () async {
                   try {
                     await authStateNotifier.googleSignIn();
                   } on Exception catch (e) {
-                    if(!context.mounted) return;
+                    if (!context.mounted) return;
                     showSnackBar(context, e.getMessage);
                   }
                 },

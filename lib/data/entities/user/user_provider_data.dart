@@ -10,6 +10,7 @@ class UserProviderData with _$UserProviderData {
     @Default('') String email,
     @Default('') String providerType,
     @Default('') String uid,
+    @Default('') String photoUrl,
   }) = _UserProviderData;
 
   factory UserProviderData.fromJson(Map<String, dynamic> json) =>

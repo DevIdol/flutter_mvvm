@@ -19,7 +19,7 @@ abstract class BaseUserRepository {
     required String userId,
     required String profileUrl,
   });
-   Future<void> deleteUser({required String userId});
+  Future<void> deleteUser({required String userId});
   Future<void> deleteProfileUrl({
     required String userId,
   });
@@ -89,6 +89,7 @@ class UserRepositoryImpl implements BaseUserRepository {
           ? 'email/password'
           : currentUser.providerData.first.providerId,
       uid: currentUser.providerData.first.uid!,
+      photoUrl: currentUser.photoURL ?? '',
     );
 
     final newUser = User(
@@ -115,12 +116,12 @@ class UserRepositoryImpl implements BaseUserRepository {
 
     if (!providerExists) {
       final newProviderData = UserProviderData(
-        userName: currentUser.displayName ?? '',
-        email: currentUser.email!,
-        providerType:
-            providerType == 'password' ? 'email/password' : providerType,
-        uid: currentUser.providerData.first.uid!,
-      );
+          userName: currentUser.displayName ?? '',
+          email: currentUser.email!,
+          providerType:
+              providerType == 'password' ? 'email/password' : providerType,
+          uid: currentUser.providerData.first.uid!,
+          photoUrl: currentUser.photoURL ?? '');
 
       final updatedUser = user.copyWith(
         profile: currentUser.photoURL ?? '',
@@ -279,10 +280,6 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   Future<void> deleteFromStorage(String url) async {
-    try {
-      await _storage.refFromURL(url).delete();
-    } catch (e) {
-      logger.e('⚡ ERROR in deleteFromStorage: $e');
-    }
+    await _storage.refFromURL(url).delete();
   }
 }

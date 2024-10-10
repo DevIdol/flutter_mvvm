@@ -24,6 +24,7 @@ mixin _$UserProviderData {
   String get email => throw _privateConstructorUsedError;
   String get providerType => throw _privateConstructorUsedError;
   String get uid => throw _privateConstructorUsedError;
+  String get photoUrl => throw _privateConstructorUsedError;
 
   /// Serializes this UserProviderData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -41,7 +42,12 @@ abstract class $UserProviderDataCopyWith<$Res> {
           UserProviderData value, $Res Function(UserProviderData) then) =
       _$UserProviderDataCopyWithImpl<$Res, UserProviderData>;
   @useResult
-  $Res call({String userName, String email, String providerType, String uid});
+  $Res call(
+      {String userName,
+      String email,
+      String providerType,
+      String uid,
+      String photoUrl});
 }
 
 /// @nodoc
@@ -63,6 +69,7 @@ class _$UserProviderDataCopyWithImpl<$Res, $Val extends UserProviderData>
     Object? email = null,
     Object? providerType = null,
     Object? uid = null,
+    Object? photoUrl = null,
   }) {
     return _then(_value.copyWith(
       userName: null == userName
@@ -81,6 +88,10 @@ class _$UserProviderDataCopyWithImpl<$Res, $Val extends UserProviderData>
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
               as String,
+      photoUrl: null == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -93,7 +104,12 @@ abstract class _$$UserProviderDataImplCopyWith<$Res>
       __$$UserProviderDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String userName, String email, String providerType, String uid});
+  $Res call(
+      {String userName,
+      String email,
+      String providerType,
+      String uid,
+      String photoUrl});
 }
 
 /// @nodoc
@@ -113,6 +129,7 @@ class __$$UserProviderDataImplCopyWithImpl<$Res>
     Object? email = null,
     Object? providerType = null,
     Object? uid = null,
+    Object? photoUrl = null,
   }) {
     return _then(_$UserProviderDataImpl(
       userName: null == userName
@@ -131,6 +148,10 @@ class __$$UserProviderDataImplCopyWithImpl<$Res>
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
               as String,
+      photoUrl: null == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -142,7 +163,8 @@ class _$UserProviderDataImpl implements _UserProviderData {
       {this.userName = '',
       this.email = '',
       this.providerType = '',
-      this.uid = ''});
+      this.uid = '',
+      this.photoUrl = ''});
 
   factory _$UserProviderDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserProviderDataImplFromJson(json);
@@ -159,10 +181,13 @@ class _$UserProviderDataImpl implements _UserProviderData {
   @override
   @JsonKey()
   final String uid;
+  @override
+  @JsonKey()
+  final String photoUrl;
 
   @override
   String toString() {
-    return 'UserProviderData(userName: $userName, email: $email, providerType: $providerType, uid: $uid)';
+    return 'UserProviderData(userName: $userName, email: $email, providerType: $providerType, uid: $uid, photoUrl: $photoUrl)';
   }
 
   @override
@@ -175,13 +200,15 @@ class _$UserProviderDataImpl implements _UserProviderData {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.providerType, providerType) ||
                 other.providerType == providerType) &&
-            (identical(other.uid, uid) || other.uid == uid));
+            (identical(other.uid, uid) || other.uid == uid) &&
+            (identical(other.photoUrl, photoUrl) ||
+                other.photoUrl == photoUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, userName, email, providerType, uid);
+      Object.hash(runtimeType, userName, email, providerType, uid, photoUrl);
 
   /// Create a copy of UserProviderData
   /// with the given fields replaced by the non-null parameter values.
@@ -205,7 +232,8 @@ abstract class _UserProviderData implements UserProviderData {
       {final String userName,
       final String email,
       final String providerType,
-      final String uid}) = _$UserProviderDataImpl;
+      final String uid,
+      final String photoUrl}) = _$UserProviderDataImpl;
 
   factory _UserProviderData.fromJson(Map<String, dynamic> json) =
       _$UserProviderDataImpl.fromJson;
@@ -218,6 +246,8 @@ abstract class _UserProviderData implements UserProviderData {
   String get providerType;
   @override
   String get uid;
+  @override
+  String get photoUrl;
 
   /// Create a copy of UserProviderData
   /// with the given fields replaced by the non-null parameter values.
