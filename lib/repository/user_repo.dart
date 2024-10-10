@@ -124,7 +124,6 @@ class UserRepositoryImpl implements BaseUserRepository {
           photoUrl: currentUser.photoURL ?? '');
 
       final updatedUser = user.copyWith(
-        profile: currentUser.photoURL ?? '',
         providerData: [...providerList, newProviderData],
         updatedAt: DateTime.now(),
       );
