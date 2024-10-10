@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mvvm/provider/user/user_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../data/data.dart';
+import '../../utils/utils.dart';
 import '../presentation.dart';
 
 class HomePage extends HookConsumerWidget {
@@ -13,7 +15,20 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    final providerData = currentUser?.providerData;
     final userAsyncValue = ref.watch(userProviderStream(userId));
+    final providerId = useState<String?>('');
+
+    // Fetch the providerId when the widget builds
+    useEffect(() {
+      Future<void> fetchProviderId() async {
+        providerId.value = await CurrentProviderSetting().get();
+      }
+
+      fetchProviderId();
+      return null;
+    }, []);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,16 +36,18 @@ class HomePage extends HookConsumerWidget {
         actions: [
           userAsyncValue.when(
             data: (user) {
-              final currentUser = auth.FirebaseAuth.instance.currentUser;
-              final providerDataUid = currentUser?.providerData.first.uid;
-
-              // Find the provider data based on the UID
               UserProviderData? userProvider;
-              if (providerDataUid != null && user?.providerData != null) {
-                userProvider = user?.providerData!.firstWhere(
-                  (provider) => provider.uid == providerDataUid,
-                  orElse: () => const UserProviderData(),
+              if (providerData != null && providerId.value!.isNotEmpty) {
+                final userInfo = providerData.firstWhere(
+                  (provider) => provider.providerId == providerId.value,
                 );
+                final providerDataUid = userInfo.uid;
+                if (providerDataUid != null && user?.providerData != null) {
+                  userProvider = user?.providerData!.firstWhere(
+                    (provider) => provider.uid == providerDataUid,
+                    orElse: () => const UserProviderData(),
+                  );
+                }
               }
               return IconButton(
                 icon: user?.profile != null && user!.profile!.isNotEmpty

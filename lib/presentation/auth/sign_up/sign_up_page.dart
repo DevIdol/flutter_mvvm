@@ -24,152 +24,156 @@ class SignUpPage extends HookConsumerWidget {
     return LoadingOverlay(
         child: Scaffold(
       backgroundColor: AppColors.lightColor,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomCard(
-              padding: const EdgeInsets.all(20),
-              color: AppColors.transparent,
-              width: MediaQuery.of(context).size.width * 0.9,
-              child: Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    const Text(
-                      'Sign Up',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 32),
-                    commonTextFormField(
-                      maxLength: 40,
-                      labelText: 'Username',
-                      controller: userNameController,
-                      validator: (value) => Validators.validateRequiredField(
-                        value: value,
-                        labelText: 'Username',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    commonTextFormField(
-                      maxLength: 40,
-                      labelText: 'Email',
-                      controller: emailInputController,
-                      validator: (value) => Validators.validateEmail(
-                        value: value,
-                        labelText: 'Email',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    commonTextFormField(
-                      maxLength: 26,
-                      labelText: 'Password',
-                      controller: passwordInputController,
-                      validator: (value) => Validators.validatePassword(
-                        value: value,
-                        labelText: 'Password',
-                      ),
-                      obscureText: !isPasswordVisible.value,
-                      onTogglePassword: (isVisible) {
-                        isPasswordVisible.value = !isVisible;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    isLoading.value
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (formKey.currentState!.validate()) {
-                                ref
-                                    .watch(loadingProvider.notifier)
-                                    .update((state) => true);
-                                FocusScope.of(context).unfocus();
-                                try {
-                                  await authStateNotifier.signUp(
-                                    userName: userNameController.text,
-                                    email: emailInputController.text,
-                                    password: passwordInputController.text,
-                                  );
-                                  if (!context.mounted) return;
-                                  ref
-                                      .watch(loadingProvider.notifier)
-                                      .update((state) => false);
-                                  await showMailConfirmationBox(
-                                    context,
-                                    emailInputController.text,
-                                  );
-                                } on Exception catch (e) {
-                                  ref
-                                      .watch(loadingProvider.notifier)
-                                      .update((state) => false);
-                                  if (!context.mounted) return;
-                                  showSnackBar(context, e.getMessage);
-                                }
-                              }
-                            },
-                            child: const Text(
-                              'Sign Up',
-                              style: TextStyle(
-                                  color: AppColors.lightColor,
-                                  fontWeight: FontWeight.bold),
-                            ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomCard(
+                  padding: const EdgeInsets.all(20),
+                  color: AppColors.transparent,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Sign Up',
+                          style:
+                              TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 32),
+                        commonTextFormField(
+                          maxLength: 40,
+                          labelText: 'Username',
+                          controller: userNameController,
+                          validator: (value) => Validators.validateRequiredField(
+                            value: value,
+                            labelText: 'Username',
                           ),
+                        ),
+                        const SizedBox(height: 20),
+                        commonTextFormField(
+                          maxLength: 40,
+                          labelText: 'Email',
+                          controller: emailInputController,
+                          validator: (value) => Validators.validateEmail(
+                            value: value,
+                            labelText: 'Email',
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        commonTextFormField(
+                          maxLength: 26,
+                          labelText: 'Password',
+                          controller: passwordInputController,
+                          validator: (value) => Validators.validatePassword(
+                            value: value,
+                            labelText: 'Password',
+                          ),
+                          obscureText: !isPasswordVisible.value,
+                          onTogglePassword: (isVisible) {
+                            isPasswordVisible.value = !isVisible;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        isLoading.value
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  if (formKey.currentState!.validate()) {
+                                    ref
+                                        .watch(loadingProvider.notifier)
+                                        .update((state) => true);
+                                    FocusScope.of(context).unfocus();
+                                    try {
+                                      await authStateNotifier.signUp(
+                                        userName: userNameController.text,
+                                        email: emailInputController.text,
+                                        password: passwordInputController.text,
+                                      );
+                                      if (!context.mounted) return;
+                                      ref
+                                          .watch(loadingProvider.notifier)
+                                          .update((state) => false);
+                                      await showMailConfirmationBox(
+                                        context,
+                                        emailInputController.text,
+                                      );
+                                    } on Exception catch (e) {
+                                      ref
+                                          .watch(loadingProvider.notifier)
+                                          .update((state) => false);
+                                      if (!context.mounted) return;
+                                      showSnackBar(context, e.getMessage);
+                                    }
+                                  }
+                                },
+                                child: const Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                      color: AppColors.lightColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    commonDivider(
+                      18,
+                      5,
+                      true,
+                    ),
+                    const Text('or'),
+                    commonDivider(
+                      18,
+                      5,
+                      false,
+                    ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                commonDivider(
-                  18,
-                  5,
-                  true,
-                ),
-                const Text('or'),
-                commonDivider(
-                  18,
-                  5,
-                  false,
+                const SizedBox(height: 10),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  commonSocialBtn(
+                    onPressed: () async {
+                      try {
+                        await authStateNotifier.googleSignIn();
+                      } on Exception catch (e) {
+                        if (!context.mounted) return;
+                        showSnackBar(context, e.getMessage);
+                      }
+                    },
+                    child: SvgPicture.asset(
+                      Assets.icons.socialGoogle,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Already have an account? Sign In',
+                    style: commonStyle(13, FontWeight.w400, AppColors.darkColor),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              commonSocialBtn(
-                onPressed: () async {
-                  try {
-                    await authStateNotifier.googleSignIn();
-                  } on Exception catch (e) {
-                    if (!context.mounted) return;
-                    showSnackBar(context, e.getMessage);
-                  }
-                },
-                child: SvgPicture.asset(
-                  Assets.icons.socialGoogle,
-                ),
-              ),
-            ]),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Already have an account? Sign In',
-                style: commonStyle(13, FontWeight.w400, AppColors.darkColor),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     ));

@@ -92,7 +92,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         );
         await _auth.signInWithCredential(credential);
         await CurrentProviderSetting().update(
-          providerId: 'google',
+          providerId: 'google.com',
         );
       } else {
         throw auth.FirebaseException(
@@ -117,38 +117,39 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
 // delete account
-  Future<void> deleteAccount(
-      {required String? password, required String profileUrl}) async {
+  Future<void> deleteAccount({
+    required String? password,
+    required String profileUrl,
+  }) async {
     try {
       final currentUser = _auth.currentUser!;
       final providerId = await CurrentProviderSetting().get() ?? '';
+
+      // Delete the profile picture from storage if it exists
       if (profileUrl.isNotEmpty) {
         await _userRepository.deleteFromStorage(profileUrl);
       }
-      logger.e("ProviderID ${providerId.contains('password')}");
+
+      // Reauthenticate the user before deletion
       if (providerId.contains('password')) {
-        await currentUser
-            .reauthenticateWithCredential(
+        await currentUser.reauthenticateWithCredential(
           auth.EmailAuthProvider.credential(
             email: currentUser.email!,
             password: password!,
           ),
-        )
-            .then((value) {
-          _userRepository.signOut();
-          _userRepository.deleteUser(userId: value.user!.uid);
-          value.user!.delete();
-        });
-      } else {
-        if (providerId.contains('google')) {
-          final provider = auth.GoogleAuthProvider();
-          await currentUser.reauthenticateWithProvider(provider).then((value) {
-            _userRepository.signOut();
-            _userRepository.deleteUser(userId: value.user!.uid);
-            value.user!.delete();
-          });
-        }
+        );
+      } else if (providerId.contains('google')) {
+        final provider = auth.GoogleAuthProvider();
+        await currentUser.reauthenticateWithProvider(provider);
       }
+
+      // Delete user data from Firestore
+      await _userRepository.deleteUser(userId: currentUser.uid);
+
+      // Finally, delete the user from Firebase Authentication
+      await currentUser.delete();
+
+      await _userRepository.signOut();
     } catch (e) {
       logger.e("Delete Error: $e");
       rethrow;
@@ -166,13 +167,3 @@ final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
   return ref.watch(userRepositoryProvider).authUserStream();
 });
 
-final passwordProvider = StateProvider.autoDispose<bool?>((ref) {
-  return ref
-      .watch(authUserStreamProvider)
-      .asData!
-      .value!
-      .providerData
-      .first
-      .providerId
-      .contains('password');
-});

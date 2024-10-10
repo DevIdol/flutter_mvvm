@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 
 import '../../../data/data.dart';
@@ -10,22 +9,12 @@ import '../../../widgets/widgets.dart';
 Widget buildProfileHeader({
   required BuildContext context,
   required User userData,
+  UserProviderData? userProvider,
   required bool showOptions,
   required VoidCallback onEditPressed,
   required VoidCallback onUploadPressed,
   required VoidCallback onRemovePressed,
 }) {
-  final currentUser = auth.FirebaseAuth.instance.currentUser;
-  final providerDataUid = currentUser?.providerData.first.uid;
-  // Find the provider data based on the UID
-  UserProviderData? userProvider;
-  if (providerDataUid != null && userData.providerData != null) {
-    userProvider = userData.providerData!.firstWhere(
-      (provider) => provider.uid == providerDataUid,
-      orElse: () => const UserProviderData(),
-    );
-  }
-
   return Center(
     child: SizedBox(
       width: double.infinity,

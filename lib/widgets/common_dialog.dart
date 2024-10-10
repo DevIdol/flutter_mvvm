@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mvvm/config/config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 
@@ -16,23 +15,30 @@ Future<void> showConfirmDialog({
 }) async {
   await showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.white,
         title: Text(
           message,
           style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkColor),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkColor,
+          ),
         ),
         actions: <Widget>[
           TextButton(
             child: const Text(
               'CANCEL',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.errorColor),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.linkColor,
+              ),
             ),
             onPressed: () {
               Navigator.of(context).pop();
@@ -42,12 +48,15 @@ Future<void> showConfirmDialog({
             child: const Text(
               'OK',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
             ),
             onPressed: () {
-              okFunction!();
+              if (okFunction != null) {
+                okFunction();
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -116,7 +125,7 @@ Future<bool> showMailConfirmationBox(
           return Dialog(
             insetPadding: const EdgeInsets.symmetric(horizontal: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -192,7 +201,6 @@ Future<bool> showMailConfirmationBox(
       false;
 }
 
-/// Common Dialog Form template
 Future<void> showCustomDialogForm({
   required BuildContext context,
   required String title,
@@ -208,10 +216,21 @@ Future<void> showCustomDialogForm({
       return StatefulBuilder(
         builder: (context, setState) {
           final screenWidth = MediaQuery.of(context).size.width;
-          final dialogWidth = screenWidth < 400 ? screenWidth * 0.98 : 400.0;
+          final dialogWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
 
           return AlertDialog(
-            title: Text(title),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            backgroundColor: Colors.white,
+            title: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkColor,
+              ),
+            ),
             content: SizedBox(
               width: dialogWidth,
               child: content,
@@ -226,12 +245,17 @@ Future<void> showCustomDialogForm({
                 child: const Text(
                   'Cancel',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: AppColors.errorColor),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.linkColor,
+                  ),
                 ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: isLoading
                     ? null
@@ -261,8 +285,9 @@ Future<void> showCustomDialogForm({
                     : const Text(
                         'Save',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.lightColor),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.lightColor,
+                        ),
                       ),
               ),
             ],
@@ -285,7 +310,6 @@ Future<void> accountDeleteConfirmationDialog({
   bool? isPasswordVisible,
   required String cancelButton,
 }) async {
-  logger.e("Password: $password");
   await showDialog<void>(
     context: context,
     builder: (
@@ -293,6 +317,9 @@ Future<void> accountDeleteConfirmationDialog({
     ) {
       final formKey = GlobalKey<FormState>();
       return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
         content: Form(
           key: formKey,
@@ -349,8 +376,8 @@ Future<void> accountDeleteConfirmationDialog({
                 child: DecoratedBox(
                   decoration: const BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Color(0xFFE7E8E7)),
-                      right: BorderSide(color: Color(0xFFE7E8E7)),
+                      top: BorderSide(color: AppColors.lightColor),
+                      right: BorderSide(color: AppColors.lightColor),
                     ),
                   ),
                   child: TextButton(
@@ -359,7 +386,7 @@ Future<void> accountDeleteConfirmationDialog({
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF3C7DFE),
+                        color: AppColors.linkColor,
                       ),
                     ),
                     onPressed: () {
@@ -373,7 +400,7 @@ Future<void> accountDeleteConfirmationDialog({
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
                       border: Border(
-                        top: BorderSide(color: Color(0xFFE7E8E7)),
+                        top: BorderSide(color: AppColors.lightColor),
                       ),
                     ),
                     child: TextButton(
@@ -381,12 +408,13 @@ Future<void> accountDeleteConfirmationDialog({
                         okButton,
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Color(0xFFF43E34),
+                          color: AppColors.errorColor,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
+                          Navigator.of(context).pop();
                           okFunction!();
                         }
                       },

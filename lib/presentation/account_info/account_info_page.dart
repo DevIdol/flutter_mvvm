@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mvvm/config/config.dart';
@@ -16,11 +17,24 @@ class AccountInfoPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    final providerData = currentUser?.providerData;
     final userAsyncValue = ref.watch(userProviderStream(userId));
     final isPasswordVisible = useState(false);
     final showOptions = useState(false);
-
     final passwordInputController = useTextEditingController();
+
+    final providerId = useState<String?>('');
+
+    // Fetch the providerId when the widget builds
+    useEffect(() {
+      Future<void> fetchProviderId() async {
+        providerId.value = await CurrentProviderSetting().get();
+      }
+
+      fetchProviderId();
+      return null;
+    }, []);
 
     void toggleOptions() {
       showOptions.value = !showOptions.value;
@@ -81,14 +95,20 @@ class AccountInfoPage extends HookConsumerWidget {
         context: context,
         title: 'Account Delete',
         message: 'Deleting your account will erase all data.',
-        password: ref.watch(passwordProvider.notifier).state!,
+        password: providerId.value == 'password',
         passwordController: passwordInputController,
         okFunction: () async {
           try {
-            logger.e("DELETE");
+            ref.watch(loadingProvider.notifier).update((state) => true);
             await authStateNotifier.deleteAccount(
                 password: passwordInputController.text,
                 profileUrl: user.profile ?? '');
+            if (!context.mounted) return;
+            Navigator.popUntil(context, (route) => route.isFirst);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const SignInPage()),
+            );
           } on Exception catch (e) {
             logger.e("Delete Error: $e");
             if (!context.mounted) return;
@@ -107,6 +127,31 @@ class AccountInfoPage extends HookConsumerWidget {
         ),
         body: userAsyncValue.when(
           data: (user) {
+            if (user == null || currentUser == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref.watch(loadingProvider.notifier).update((state) => false);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignInPage()),
+                );
+              });
+              return const SizedBox.shrink();
+            }
+
+            UserProviderData? userProvider;
+            if (providerData != null && providerId.value!.isNotEmpty) {
+              final userInfo = providerData.firstWhere(
+                (provider) => provider.providerId == providerId.value,
+              );
+              final providerDataUid = userInfo.uid;
+              if (providerDataUid != null && user.providerData != null) {
+                userProvider = user.providerData!.firstWhere(
+                  (provider) => provider.uid == providerDataUid,
+                  orElse: () => const UserProviderData(),
+                );
+              }
+            }
+
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -115,7 +160,8 @@ class AccountInfoPage extends HookConsumerWidget {
                   children: [
                     buildProfileHeader(
                       context: context,
-                      userData: user!,
+                      userData: user,
+                      userProvider: userProvider,
                       showOptions: showOptions.value,
                       onEditPressed: toggleOptions,
                       onUploadPressed: () => uploadProfile(user),
@@ -128,12 +174,12 @@ class AccountInfoPage extends HookConsumerWidget {
                       child: Column(
                         children: [
                           buildUserInfoRow(
-                            title: user.providerData!.first.userName,
+                            title: userProvider?.userName ?? '',
                             icon: Icons.edit,
                             onPressed: () => showEditFieldDialog(
                               context,
                               label: 'Edit Username',
-                              initialValue: user.providerData!.first.userName,
+                              initialValue: userProvider?.userName ?? '',
                               onSave: (value) async {
                                 try {
                                   final userNotifier = ref.read(
