@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mvvm/config/config.dart';
 import 'package:flutter_mvvm/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -16,8 +17,10 @@ class AccountInfoPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsyncValue = ref.watch(userProviderStream(userId));
-
+    final isPasswordVisible = useState(false);
     final showOptions = useState(false);
+
+    final passwordInputController = useTextEditingController();
 
     void toggleOptions() {
       showOptions.value = !showOptions.value;
@@ -68,6 +71,33 @@ class AccountInfoPage extends HookConsumerWidget {
           showSnackBar(context, e.getMessage);
         }
       }
+    }
+
+    // delete account
+    Future<void> accountDelete(User user) async {
+      final authStateNotifier = ref.watch(authNotifierProvider.notifier);
+      await accountDeleteConfirmationDialog(
+        isPasswordVisible: isPasswordVisible.value,
+        context: context,
+        title: 'Account Delete',
+        message: 'Deleting your account will erase all data.',
+        password: ref.watch(passwordProvider.notifier).state!,
+        passwordController: passwordInputController,
+        okFunction: () async {
+          try {
+            logger.e("DELETE");
+            await authStateNotifier.deleteAccount(
+                password: passwordInputController.text,
+                profileUrl: user.profile ?? '');
+          } on Exception catch (e) {
+            logger.e("Delete Error: $e");
+            if (!context.mounted) return;
+            showSnackBar(context, e.getMessage);
+          }
+        },
+        okButton: 'Withdraw',
+        cancelButton: 'Cancel',
+      );
     }
 
     return LoadingOverlay(
@@ -166,12 +196,7 @@ class AccountInfoPage extends HookConsumerWidget {
                             titleColor: AppColors.errorColor,
                             icon: Icons.delete,
                             iconColor: AppColors.errorColor,
-                            onPressed: () async {
-                              await showConfirmDialog(
-                                  context: context,
-                                  message: Messages.deleteAccAlertMsg,
-                                  okFunction: () {});
-                            },
+                            onPressed: () => accountDelete(user),
                           ),
                         ],
                       ),

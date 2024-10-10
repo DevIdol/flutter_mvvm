@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm/config/config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 
@@ -267,6 +268,134 @@ Future<void> showCustomDialogForm({
             ],
           );
         },
+      );
+    },
+  );
+}
+
+// account delete confirmation
+Future<void> accountDeleteConfirmationDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required VoidCallback? okFunction,
+  String? okButton,
+  bool password = false,
+  TextEditingController? passwordController,
+  bool? isPasswordVisible,
+  required String cancelButton,
+}) async {
+  logger.e("Password: $password");
+  await showDialog<void>(
+    context: context,
+    builder: (
+      BuildContext context,
+    ) {
+      final formKey = GlobalKey<FormState>();
+      return AlertDialog(
+        contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Gap(10),
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (password)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15, bottom: 5),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Please enter your password to continue.',
+                          style: TextStyle(
+                            fontSize: 13,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const Gap(5),
+                        commonTextFormField(
+                          labelText: 'Password ',
+                          controller: passwordController!,
+                          validator: (value) =>
+                              Validators.validateRequiredField(
+                                  value: value, labelText: 'Password'),
+                          obscureText: true,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          Row(
+            children: [
+              Expanded(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Color(0xFFE7E8E7)),
+                      right: BorderSide(color: Color(0xFFE7E8E7)),
+                    ),
+                  ),
+                  child: TextButton(
+                    child: Text(
+                      cancelButton,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF3C7DFE),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+              if (okButton != null && okButton.isNotEmpty)
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Color(0xFFE7E8E7)),
+                      ),
+                    ),
+                    child: TextButton(
+                      child: Text(
+                        okButton,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFFF43E34),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          okFunction!();
+                        }
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          )
+        ],
       );
     },
   );

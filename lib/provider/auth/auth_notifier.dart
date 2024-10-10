@@ -117,7 +117,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
 // delete account
-  Future<String?> deleteAccount(
+  Future<void> deleteAccount(
       {required String? password, required String profileUrl}) async {
     try {
       final currentUser = _auth.currentUser!;
@@ -125,6 +125,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       if (profileUrl.isNotEmpty) {
         await _userRepository.deleteFromStorage(profileUrl);
       }
+      logger.e("ProviderID ${providerId.contains('password')}");
       if (providerId.contains('password')) {
         await currentUser
             .reauthenticateWithCredential(
@@ -148,9 +149,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           });
         }
       }
-      return null;
-    } on auth.FirebaseAuthException catch (error) {
-      return error.message;
+    } catch (e) {
+      logger.e("Delete Error: $e");
+      rethrow;
     }
   }
 }
@@ -163,4 +164,15 @@ final authNotifierProvider =
 
 final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
   return ref.watch(userRepositoryProvider).authUserStream();
+});
+
+final passwordProvider = StateProvider.autoDispose<bool?>((ref) {
+  return ref
+      .watch(authUserStreamProvider)
+      .asData!
+      .value!
+      .providerData
+      .first
+      .providerId
+      .contains('password');
 });
