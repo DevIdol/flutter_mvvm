@@ -251,7 +251,9 @@ Future<void> showEditAddressDialog(
 
   return showCustomDialogForm(
     context: context,
-    title: 'Edit Address',
+    title: addressName.isEmpty && addressLocation.isEmpty
+        ? 'Add Address'
+        : 'Edit Address',
     content: Form(
       key: formKey,
       child: Column(

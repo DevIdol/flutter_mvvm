@@ -72,7 +72,14 @@ class SignInPage extends HookConsumerWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (context) => const ResetPasswordPage(),
+                            ),
+                          );
+                          formKey.currentState?.reset();
+                        },
                         child: Text(
                           'Forgot your password?',
                           style: commonStyle(

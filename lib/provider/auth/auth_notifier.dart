@@ -106,6 +106,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  // reset password
+  Future<void> forgotPassword(String email) async {
+    try {
+      await auth.FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      logger.e('⚡ ERROR: $e');
+      rethrow;
+    }
+  }
+
 // delete account
   Future<String?> deleteAccount(
       {required String? password, required String profileUrl}) async {

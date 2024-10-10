@@ -21,6 +21,7 @@ class AppColors {
   static const Color lightColor = Color(0xFFFBFDFD);
   static const Color darkColor = Color(0xFF202021);
   static const Color errorColor = Color(0xFFC00505);
+  static const Color successColor = Color(0xFF02BDAA);
   static const Color cardColor = Color(0xE4FFFFFF);
   static const Color goldColor = Color(0xFFFFC107);
   static const Color transparent = Color(0x99FFFFFF);
