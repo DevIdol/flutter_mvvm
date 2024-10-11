@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_mvvm/config/config.dart';
 import 'package:flutter_mvvm/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -110,7 +109,7 @@ class AccountInfoPage extends HookConsumerWidget {
               MaterialPageRoute(builder: (context) => const SignInPage()),
             );
           } on Exception catch (e) {
-            logger.e("Delete Error: $e");
+            ref.watch(loadingProvider.notifier).update((state) => false);
             if (!context.mounted) return;
             showSnackBar(context, e.getMessage);
           }
