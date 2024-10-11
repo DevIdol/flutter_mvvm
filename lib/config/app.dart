@@ -15,6 +15,7 @@ class MyApp extends HookConsumerWidget {
     final authStateNotifier = ref.watch(authNotifierProvider.notifier);
 
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       title: Messages.titleMsg,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

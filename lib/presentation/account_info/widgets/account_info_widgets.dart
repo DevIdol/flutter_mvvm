@@ -155,7 +155,6 @@ Widget buildProfileHeader({
   );
 }
 
-// please create design like github profile change button, show only edit icon in the initial and when i click edit icon show upload and remove
 Widget buildUserInfoRow({
   required String title,
   Color? titleColor = AppColors.darkColor,

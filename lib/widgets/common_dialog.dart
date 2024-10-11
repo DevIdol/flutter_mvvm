@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../assets/assets.gen.dart';
 import '../presentation/presentation.dart';
+import '../provider/provider.dart';
 import '../utils/utils.dart';
 import 'widgets.dart';
 
@@ -97,7 +98,7 @@ void showSnackBar(BuildContext context, String msg) {
           ),
           color: AppColors.errorColor,
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
           },
         ),
       ],
@@ -111,8 +112,9 @@ void showSnackBar(BuildContext context, String msg) {
     elevation: 0,
     duration: const Duration(milliseconds: 5000),
   );
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
 }
+
 
 Future<bool> showMailConfirmationBox(
   BuildContext context,

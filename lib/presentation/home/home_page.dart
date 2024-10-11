@@ -96,9 +96,7 @@ class HomePage extends HookConsumerWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Home Page'),
-      ),
+      body: TodoListPage(userId: userId),
     );
   }
 }

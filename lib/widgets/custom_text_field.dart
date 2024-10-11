@@ -12,7 +12,7 @@ class CustomTextField extends StatelessWidget {
   final bool isEnabled;
   final bool obscureText;
   final ValueChanged<bool>? onTogglePassword;
-
+  final int? maxLines;
   const CustomTextField({
     super.key,
     required this.label,
@@ -24,7 +24,8 @@ class CustomTextField extends StatelessWidget {
     this.isReadOnly = false,
     this.isEnabled = true,
     this.obscureText = false,
-    this.onTogglePassword
+    this.onTogglePassword,
+    this.maxLines,
   });
 
   @override
@@ -33,6 +34,7 @@ class CustomTextField extends StatelessWidget {
       readOnly: isReadOnly,
       initialValue: initialValue,
       maxLength: maxLength,
+      maxLines: maxLines ?? 1,
       autocorrect: true,
       decoration: inputDecoration(label, obscureText, onTogglePassword),
       autovalidateMode: AutovalidateMode.onUserInteraction,

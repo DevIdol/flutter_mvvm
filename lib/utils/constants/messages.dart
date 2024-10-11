@@ -16,4 +16,8 @@ class Messages {
   static String passChangeFailMsg = 'Failed to change password';
   static String deleteProfileImgMsg =
       'Are you sure to delete your profile image?';
+  static String saveTodoBtnTxt = 'Save Todo';
+  static String todoSaveSuccess = 'Todo saved successfully!';
+  static String createTodo = 'Create Todo';
+  static String updateTodo = 'Update Todo';
 }
