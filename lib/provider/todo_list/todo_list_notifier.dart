@@ -7,6 +7,11 @@ import '../../data/data.dart';
 import '../../repository/todo_repo.dart';
 import 'todo_list_state.dart';
 
+final todoProviderStream = StreamProvider.family<Todo?, String>((ref, todoId) {
+  final todoRepository = ref.watch(todoRepositoryProvider);
+  return todoRepository.getTodo(todoId: todoId);
+});
+
 final todoListNotifierProvider =
     StateNotifierProvider.autoDispose<TodoListNotifier, TodoListState>(
   (ref) {

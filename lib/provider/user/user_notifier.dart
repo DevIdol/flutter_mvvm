@@ -14,6 +14,12 @@ final userProviderStream = StreamProvider.family<User?, String>((ref, userId) {
   return userRepository.getUserStream(userId: userId);
 });
 
+final userProviderFuture = FutureProvider.family<User?, String>((ref, userId) {
+  final userRepository = ref.watch(userRepositoryProvider);
+  return userRepository.getUserFuture(userId: userId);
+});
+
+
 final userNotifierProvider = StateNotifierProvider.autoDispose
     .family<UserNotifier, UserEditState, User?>(
   (ref, user) {

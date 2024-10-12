@@ -36,10 +36,9 @@ class SaveButton extends HookConsumerWidget {
             ref.watch(loadingProvider.notifier).update((state) => true);
             try {
               await todoUpsertNotifier.upsertTodo();
-              if (context.mounted) {
-                showSnackBar(context, Messages.todoSaveSuccess);
-                Navigator.of(context).pop();
-              }
+              if (!context.mounted) return;
+              showSnackBar(context, Messages.todoSaveSuccess);
+              Navigator.of(context).pop(true);
             } catch (e) {
               if (context.mounted) {
                 if (e is Exception) {

@@ -15,7 +15,7 @@ abstract class BaseTodoRepository {
   Future<void> deleteTodos(List<String> todoIds);
 }
 
-final todoRepositoryProvider = Provider.autoDispose<TodoRepositoryImpl>(
+final todoRepositoryProvider = Provider<TodoRepositoryImpl>(
   (ref) => TodoRepositoryImpl(),
 );
 
@@ -127,3 +127,8 @@ class TodoRepositoryImpl implements BaseTodoRepository {
     }
   }
 }
+
+final todoProviderStream = StreamProvider.family<Todo?, String>((ref, todoId) {
+  final todoRepository = ref.watch(todoRepositoryProvider);
+  return todoRepository.getTodo(todoId: todoId);
+});

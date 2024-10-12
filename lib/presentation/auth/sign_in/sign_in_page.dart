@@ -115,6 +115,9 @@ class SignInPage extends HookConsumerWidget {
                                     FirebaseAuth.instance.currentUser;
 
                                 if (authUser != null) {
+                                  await Future.delayed(
+                                      const Duration(milliseconds: 1000));
+                                  if (!context.mounted) return;
                                   Navigator.of(context)
                                       .pushAndRemoveUntil<void>(
                                     MaterialPageRoute(

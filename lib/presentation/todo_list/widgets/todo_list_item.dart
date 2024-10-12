@@ -75,7 +75,7 @@ class TodoListItem extends HookConsumerWidget {
           context,
           MaterialPageRoute(
             builder: (context) => TodoDetailPage(
-                todo: todo, isOwner: isOwner, ownerName: ownerName),
+                todoId: todo.id ?? '', isOwner: isOwner, ownerName: ownerName),
           ),
         );
       }
