@@ -87,9 +87,7 @@ class UserRepositoryImpl implements BaseUserRepository {
     final userProviderData = UserProviderData(
       userName: currentUser.displayName ?? '',
       email: currentUser.email!,
-      providerType: currentUser.providerData.first.providerId == 'password'
-          ? 'email/password'
-          : currentUser.providerData.first.providerId,
+      providerType: currentUser.providerData.first.providerId,
       uid: currentUser.providerData.first.uid!,
       photoUrl: currentUser.photoURL ?? '',
     );
@@ -112,16 +110,14 @@ class UserRepositoryImpl implements BaseUserRepository {
     final providerType = currentUser.providerData.first.providerId;
     final providerList = user.providerData ?? [];
 
-    final providerExists = providerList.any((provider) =>
-        provider.providerType ==
-        (providerType == 'password' ? 'email/password' : providerType));
+    final providerExists =
+        providerList.any((provider) => provider.providerType == providerType);
 
     if (!providerExists) {
       final newProviderData = UserProviderData(
           userName: currentUser.displayName ?? '',
           email: currentUser.email!,
-          providerType:
-              providerType == 'password' ? 'email/password' : providerType,
+          providerType: providerType,
           uid: currentUser.providerData.first.uid!,
           photoUrl: currentUser.photoURL ?? '');
 
@@ -173,7 +169,6 @@ class UserRepositoryImpl implements BaseUserRepository {
     required String newUsername,
   }) async {
     try {
-
       final userDoc = await _userCollection.doc(userId).get();
       final userData = userDoc.data() ?? {};
 
