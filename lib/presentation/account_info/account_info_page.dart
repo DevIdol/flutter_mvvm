@@ -184,6 +184,7 @@ class AccountInfoPage extends HookConsumerWidget {
                                   final userNotifier = ref.read(
                                       userNotifierProvider(user).notifier);
                                   userNotifier.setUserName(value);
+                                  userNotifier.setProviderId(providerId.value!);
                                   if (userNotifier.mounted) {
                                     await userNotifier.updateUsername();
                                   }

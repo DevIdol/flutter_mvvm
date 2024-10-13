@@ -19,6 +19,7 @@ mixin _$UserEditState {
   String? get id => throw _privateConstructorUsedError;
   String get userName => throw _privateConstructorUsedError;
   String? get profile => throw _privateConstructorUsedError;
+  String? get providerId => throw _privateConstructorUsedError;
   @NullableAddressConverters()
   Address? get address => throw _privateConstructorUsedError;
   Uint8List? get imageData => throw _privateConstructorUsedError;
@@ -40,6 +41,7 @@ abstract class $UserEditStateCopyWith<$Res> {
       {String? id,
       String userName,
       String? profile,
+      String? providerId,
       @NullableAddressConverters() Address? address,
       Uint8List? imageData});
 
@@ -64,6 +66,7 @@ class _$UserEditStateCopyWithImpl<$Res, $Val extends UserEditState>
     Object? id = freezed,
     Object? userName = null,
     Object? profile = freezed,
+    Object? providerId = freezed,
     Object? address = freezed,
     Object? imageData = freezed,
   }) {
@@ -79,6 +82,10 @@ class _$UserEditStateCopyWithImpl<$Res, $Val extends UserEditState>
       profile: freezed == profile
           ? _value.profile
           : profile // ignore: cast_nullable_to_non_nullable
+              as String?,
+      providerId: freezed == providerId
+          ? _value.providerId
+          : providerId // ignore: cast_nullable_to_non_nullable
               as String?,
       address: freezed == address
           ? _value.address
@@ -118,6 +125,7 @@ abstract class _$$UserEditStateImplCopyWith<$Res>
       {String? id,
       String userName,
       String? profile,
+      String? providerId,
       @NullableAddressConverters() Address? address,
       Uint8List? imageData});
 
@@ -141,6 +149,7 @@ class __$$UserEditStateImplCopyWithImpl<$Res>
     Object? id = freezed,
     Object? userName = null,
     Object? profile = freezed,
+    Object? providerId = freezed,
     Object? address = freezed,
     Object? imageData = freezed,
   }) {
@@ -156,6 +165,10 @@ class __$$UserEditStateImplCopyWithImpl<$Res>
       profile: freezed == profile
           ? _value.profile
           : profile // ignore: cast_nullable_to_non_nullable
+              as String?,
+      providerId: freezed == providerId
+          ? _value.providerId
+          : providerId // ignore: cast_nullable_to_non_nullable
               as String?,
       address: freezed == address
           ? _value.address
@@ -176,6 +189,7 @@ class _$UserEditStateImpl implements _UserEditState {
       {this.id = '',
       this.userName = '',
       this.profile = '',
+      this.providerId = '',
       @NullableAddressConverters() this.address,
       this.imageData});
 
@@ -189,6 +203,9 @@ class _$UserEditStateImpl implements _UserEditState {
   @JsonKey()
   final String? profile;
   @override
+  @JsonKey()
+  final String? providerId;
+  @override
   @NullableAddressConverters()
   final Address? address;
   @override
@@ -196,7 +213,7 @@ class _$UserEditStateImpl implements _UserEditState {
 
   @override
   String toString() {
-    return 'UserEditState(id: $id, userName: $userName, profile: $profile, address: $address, imageData: $imageData)';
+    return 'UserEditState(id: $id, userName: $userName, profile: $profile, providerId: $providerId, address: $address, imageData: $imageData)';
   }
 
   @override
@@ -208,13 +225,15 @@ class _$UserEditStateImpl implements _UserEditState {
             (identical(other.userName, userName) ||
                 other.userName == userName) &&
             (identical(other.profile, profile) || other.profile == profile) &&
+            (identical(other.providerId, providerId) ||
+                other.providerId == providerId) &&
             (identical(other.address, address) || other.address == address) &&
             const DeepCollectionEquality().equals(other.imageData, imageData));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, userName, profile, address,
-      const DeepCollectionEquality().hash(imageData));
+  int get hashCode => Object.hash(runtimeType, id, userName, profile,
+      providerId, address, const DeepCollectionEquality().hash(imageData));
 
   /// Create a copy of UserEditState
   /// with the given fields replaced by the non-null parameter values.
@@ -230,6 +249,7 @@ abstract class _UserEditState implements UserEditState {
       {final String? id,
       final String userName,
       final String? profile,
+      final String? providerId,
       @NullableAddressConverters() final Address? address,
       final Uint8List? imageData}) = _$UserEditStateImpl;
 
@@ -239,6 +259,8 @@ abstract class _UserEditState implements UserEditState {
   String get userName;
   @override
   String? get profile;
+  @override
+  String? get providerId;
   @override
   @NullableAddressConverters()
   Address? get address;

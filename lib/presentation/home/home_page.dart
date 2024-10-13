@@ -85,7 +85,8 @@ class HomePage extends HookConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AccountInfoPage(userId: authUser.uid)),
+                        builder: (context) =>
+                            AccountInfoPage(userId: authUser.uid)),
                   );
                 },
               );
