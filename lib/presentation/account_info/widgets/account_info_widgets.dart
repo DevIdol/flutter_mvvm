@@ -31,7 +31,8 @@ Widget buildProfileHeader({
                         child: CachedNetworkImage(
                           imageUrl: userData.profile!,
                           placeholder: (context, url) =>
-                              const CircularProgressIndicator(),
+                              const CircularProgressIndicator(
+                                  color: AppColors.primaryColor),
                           errorWidget: (context, url, error) =>
                               const Icon(Icons.error, size: 50),
                           fit: BoxFit.cover,
@@ -45,7 +46,8 @@ Widget buildProfileHeader({
                             child: CachedNetworkImage(
                               imageUrl: userProvider.photoUrl,
                               placeholder: (context, url) =>
-                                  const CircularProgressIndicator(),
+                                  const CircularProgressIndicator(
+                                      color: AppColors.primaryColor),
                               errorWidget: (context, url, error) =>
                                   const Icon(Icons.error, size: 50),
                               fit: BoxFit.cover,

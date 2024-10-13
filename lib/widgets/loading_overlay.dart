@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../provider/provider.dart';
-
+import '../utils/utils.dart';
 
 class LoadingOverlay extends StatefulHookConsumerWidget {
   const LoadingOverlay({super.key, required this.child});
@@ -27,7 +27,7 @@ class _LoadingOverlayState extends ConsumerState<LoadingOverlay> {
           ),
         if (isLoading)
           const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color: AppColors.lightColor),
           ),
       ],
     );

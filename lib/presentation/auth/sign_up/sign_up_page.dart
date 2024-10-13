@@ -41,15 +41,16 @@ class SignUpPage extends HookConsumerWidget {
                       children: [
                         const Text(
                           'Sign Up',
-                          style:
-                              TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 32),
                         commonTextFormField(
                           maxLength: 40,
                           labelText: 'Username',
                           controller: userNameController,
-                          validator: (value) => Validators.validateRequiredField(
+                          validator: (value) =>
+                              Validators.validateRequiredField(
                             value: value,
                             labelText: 'Username',
                           ),
@@ -80,7 +81,8 @@ class SignUpPage extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 20),
                         isLoading.value
-                            ? const CircularProgressIndicator()
+                            ? const CircularProgressIndicator(
+                                color: AppColors.primaryColor)
                             : ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryColor,
@@ -168,7 +170,8 @@ class SignUpPage extends HookConsumerWidget {
                   },
                   child: Text(
                     'Already have an account? Sign In',
-                    style: commonStyle(13, FontWeight.w400, AppColors.darkColor),
+                    style:
+                        commonStyle(13, FontWeight.w400, AppColors.darkColor),
                   ),
                 ),
               ],
