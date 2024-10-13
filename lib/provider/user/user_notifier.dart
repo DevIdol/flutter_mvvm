@@ -19,7 +19,6 @@ final userProviderFuture = FutureProvider.family<User?, String>((ref, userId) {
   return userRepository.getUserFuture(userId: userId);
 });
 
-
 final userNotifierProvider = StateNotifierProvider.autoDispose
     .family<UserNotifier, UserEditState, User?>(
   (ref, user) {
@@ -33,6 +32,7 @@ class UserNotifier extends StateNotifier<UserEditState> {
       : super(
           UserEditState(
             id: user?.id ?? '',
+            providerId: '',
             userName: user?.providerData?.first.userName ?? '',
             profile: user?.profile ?? '',
             address: user?.address ?? Address(name: '', location: ''),
@@ -44,6 +44,10 @@ class UserNotifier extends StateNotifier<UserEditState> {
 
   void setUserId(String userId) {
     state = state.copyWith(id: userId);
+  }
+
+  void setProviderId(String providerId) {
+    state = state.copyWith(providerId: providerId);
   }
 
   void setUserName(String userName) {
@@ -106,10 +110,15 @@ class UserNotifier extends StateNotifier<UserEditState> {
 
 // update username
   Future<void> updateUsername() async {
-    if (state.id!.isEmpty || state.userName.isEmpty) return;
+    if (state.id!.isEmpty ||
+        state.userName.isEmpty ||
+        state.providerId!.isEmpty) return;
     try {
       await userRepository.updateUsername(
-          userId: state.id!, newUsername: state.userName.trim());
+        userId: state.id!,
+        providerId: state.providerId!,
+        newUsername: state.userName.trim(),
+      );
       if (mounted) {
         state = state.copyWith(
           userName: state.userName,

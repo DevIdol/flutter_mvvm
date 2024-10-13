@@ -27,7 +27,9 @@ abstract class BaseUserRepository {
   Future<User?> getUserFuture({required String userId});
   Stream<User?> getUserStream({required String userId});
   Future<void> updateUsername(
-      {required String userId, required String newUsername});
+      {required String userId,
+      required String providerId,
+      required String newUsername});
   Future<void> changePassword(
       {required String oldPassword, required String newPassword});
   Future<void> updateUserAddress({
@@ -167,24 +169,35 @@ class UserRepositoryImpl implements BaseUserRepository {
   @override
   Future<void> updateUsername({
     required String userId,
+    required String providerId,
     required String newUsername,
   }) async {
     try {
+
       final userDoc = await _userCollection.doc(userId).get();
-      final userData = userDoc.data() as Map<String, dynamic>;
+      final userData = userDoc.data() ?? {};
+
       List<dynamic> providerDataList = userData['providerData'] ?? [];
 
-      if (providerDataList.isNotEmpty) {
-        providerDataList[0]['userName'] = newUsername;
-      }
+      final matchingProvider = providerDataList.firstWhere(
+        (data) => data['providerType'] == providerId,
+        orElse: () => null,
+      );
 
-      await _userCollection.doc(userId).update({
-        'providerData': providerDataList,
-        'updatedAt': DateTime.now(),
-      });
-      final currentUser = _auth.currentUser;
-      if (currentUser != null) {
-        await currentUser.updateDisplayName(newUsername);
+      if (matchingProvider != null) {
+        matchingProvider['userName'] = newUsername;
+
+        await _userCollection.doc(userId).update({
+          'providerData': providerDataList,
+          'updatedAt': DateTime.now(),
+        });
+
+        final currentUser = _auth.currentUser;
+        if (currentUser != null) {
+          await currentUser.updateDisplayName(newUsername);
+        }
+      } else {
+        logger.e('⚡ No matching provider found for providerId: $providerId');
       }
     } catch (e) {
       logger.e('⚡ ERROR updating username: $e');

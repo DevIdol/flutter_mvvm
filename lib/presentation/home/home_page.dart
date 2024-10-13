@@ -85,7 +85,8 @@ class HomePage extends HookConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AccountInfoPage(userId: authUser.uid)),
+                        builder: (context) =>
+                            AccountInfoPage(userId: authUser.uid)),
                   );
                 },
               );
@@ -97,7 +98,7 @@ class HomePage extends HookConsumerWidget {
           ),
         ],
       ),
-      body: TodoListPage(userId: userId),
+      body: TodoListPage(userId: authUser.uid),
     );
   }
 }
