@@ -10,14 +10,13 @@ import '../../utils/utils.dart';
 import '../presentation.dart';
 
 class HomePage extends HookConsumerWidget {
-  const HomePage({super.key, required this.userId});
-  final String userId;
+  const HomePage({super.key, required this.authUser});
+  final auth.User authUser;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = auth.FirebaseAuth.instance.currentUser;
-    final providerData = currentUser?.providerData;
-    final userAsyncValue = ref.watch(userProviderStream(userId));
+    final providerData = authUser.providerData;
+    final userAsyncValue = ref.watch(userProviderStream(authUser.uid));
     final providerId = useState<String?>('');
 
     // Fetch the providerId when the widget builds
@@ -37,7 +36,7 @@ class HomePage extends HookConsumerWidget {
           userAsyncValue.when(
             data: (user) {
               UserProviderData? userProvider;
-              if (providerData != null && providerId.value!.isNotEmpty) {
+              if (providerId.value!.isNotEmpty) {
                 final userInfo = providerData.firstWhere(
                   (provider) => provider.providerId == providerId.value,
                 );
@@ -86,13 +85,15 @@ class HomePage extends HookConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AccountInfoPage(userId: userId)),
+                        builder: (context) => AccountInfoPage(userId: authUser.uid)),
                   );
                 },
               );
             },
             loading: () => const Icon(Icons.account_circle),
-            error: (error, stack) => const Icon(Icons.error),
+            error: (error, stack) {
+              return const Icon(Icons.error);
+            },
           ),
         ],
       ),

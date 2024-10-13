@@ -22,198 +22,199 @@ class SignInPage extends HookConsumerWidget {
     final isPasswordVisible = useState(false);
 
     return LoadingOverlay(
-        child: Scaffold(
-      backgroundColor: AppColors.lightColor,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomCard(
-                  padding: const EdgeInsets.all(20),
-                  color: AppColors.transparent,
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Sign In',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 32),
-                        commonTextFormField(
-                          maxLength: 40,
-                          labelText: 'Email',
-                          controller: emailInputController,
-                          validator: (value) =>
-                              Validators.validateRequiredField(
-                            value: value,
+      child: Scaffold(
+        backgroundColor: AppColors.lightColor,
+        body: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomCard(
+                    padding: const EdgeInsets.all(20),
+                    color: AppColors.transparent,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          commonTextFormField(
+                            maxLength: 40,
                             labelText: 'Email',
+                            controller: emailInputController,
+                            validator: (value) =>
+                                Validators.validateRequiredField(
+                              value: value,
+                              labelText: 'Email',
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        commonTextFormField(
-                          maxLength: 26,
-                          labelText: 'Password',
-                          controller: passwordInputController,
-                          validator: (value) =>
-                              Validators.validateRequiredField(
-                            value: value,
+                          const SizedBox(height: 20),
+                          commonTextFormField(
+                            maxLength: 26,
                             labelText: 'Password',
+                            controller: passwordInputController,
+                            validator: (value) =>
+                                Validators.validateRequiredField(
+                              value: value,
+                              labelText: 'Password',
+                            ),
+                            obscureText: !isPasswordVisible.value,
+                            onTogglePassword: (isVisible) {
+                              isPasswordVisible.value = !isVisible;
+                            },
                           ),
-                          obscureText: !isPasswordVisible.value,
-                          onTogglePassword: (isVisible) {
-                            isPasswordVisible.value = !isVisible;
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push<void>(
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push<void>(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ResetPasswordPage(),
+                                  ),
+                                );
+                                formKey.currentState?.reset();
+                              },
+                              child: Text(
+                                'Forgot your password?',
+                                style: commonStyle(
+                                    13, FontWeight.w400, AppColors.linkColor),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () async {
+                              if (formKey.currentState!.validate()) {
+                                ref
+                                    .watch(loadingProvider.notifier)
+                                    .update((state) => true);
+                                FocusScope.of(context).unfocus();
+                                try {
+                                  await authStateNotifier.signIn(
+                                    emailInputController.text,
+                                    passwordInputController.text,
+                                  );
+                                  final authUser =
+                                      FirebaseAuth.instance.currentUser;
+                                  if (authUser != null) {
+                                    if (!context.mounted) return;
+                                    Navigator.of(context)
+                                        .pushAndRemoveUntil<void>(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            HomePage(authUser: authUser),
+                                      ),
+                                      (route) => false,
+                                    );
+                                  }
+                                } on Exception catch (e) {
+                                  if (!context.mounted) return;
+                                  showSnackBar(context, e.getMessage);
+                                } finally {
+                                  if (context.mounted) {
+                                    ref
+                                        .read(loadingProvider.notifier)
+                                        .update((state) => false);
+                                  }
+                                }
+                              }
+                            },
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                color: AppColors.lightColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      commonDivider(18, 5, true),
+                      const Text('or'),
+                      commonDivider(18, 5, false),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      commonSocialBtn(
+                        onPressed: () async {
+                          ref
+                              .read(loadingProvider.notifier)
+                              .update((state) => true);
+                          try {
+                            await authStateNotifier.googleSignIn();
+                            final authUser = FirebaseAuth.instance.currentUser;
+                            if (authUser != null) {
+                              if (!context.mounted) return;
+                              Navigator.of(context).pushAndRemoveUntil<void>(
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      const ResetPasswordPage(),
+                                      HomePage(authUser: authUser),
                                 ),
+                                (route) => false,
                               );
-                              formKey.currentState?.reset();
-                            },
-                            child: Text(
-                              'Forgot your password?',
-                              style: commonStyle(
-                                  13, FontWeight.w400, AppColors.linkColor),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () async {
-                            if (formKey.currentState!.validate()) {
-                              ref
-                                  .watch(loadingProvider.notifier)
-                                  .update((state) => true);
-                              FocusScope.of(context).unfocus();
-                              try {
-                                await authStateNotifier.signIn(
-                                  emailInputController.text,
-                                  passwordInputController.text,
-                                );
-                                if (!context.mounted) return;
-
-                                final authUser =
-                                    FirebaseAuth.instance.currentUser;
-
-                                if (authUser != null) {
-                                  Navigator.of(context)
-                                      .pushAndRemoveUntil<void>(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          HomePage(userId: authUser.uid),
-                                    ),
-                                    (route) => false,
-                                  );
-                                }
-                                ref
-                                    .watch(loadingProvider.notifier)
-                                    .update((state) => false);
-                              } on Exception catch (e) {
-                                if (!context.mounted) return;
-                                ref
-                                    .watch(loadingProvider.notifier)
-                                    .update((state) => false);
-                                showSnackBar(context, e.getMessage);
-                              }
                             }
-                          },
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(
-                                color: AppColors.lightColor,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    commonDivider(
-                      18,
-                      5,
-                      true,
-                    ),
-                    const Text('or'),
-                    commonDivider(
-                      18,
-                      5,
-                      false,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  commonSocialBtn(
-                    onPressed: () async {
-                      try {
-                        await authStateNotifier.googleSignIn().whenComplete(() {
-                          if (!context.mounted) return;
-
-                          final authUser = FirebaseAuth.instance.currentUser;
-
-                          if (authUser != null) {
-                            Navigator.of(context).pushAndRemoveUntil<void>(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    HomePage(userId: authUser.uid),
-                              ),
-                              (route) => false,
-                            );
+                          } on Exception catch (e) {
+                            if (!context.mounted) return;
+                            showSnackBar(context, e.getMessage);
+                          } finally {
+                            if (context.mounted) {
+                              ref
+                                  .read(loadingProvider.notifier)
+                                  .update((state) => false);
+                            }
                           }
-                        });
-                      } on Exception catch (e) {
-                        if (!context.mounted) return;
-                        showSnackBar(context, e.getMessage);
-                      }
+                        },
+                        child: SvgPicture.asset(Assets.icons.socialGoogle),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpPage(),
+                        ),
+                      );
                     },
-                    child: SvgPicture.asset(
-                      Assets.icons.socialGoogle,
+                    child: Text(
+                      'Don\'t have an account? Sign Up',
+                      style:
+                          commonStyle(13, FontWeight.w400, AppColors.darkColor),
                     ),
                   ),
-                ]),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpPage(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Don\'t have an account? Sign Up',
-                    style:
-                        commonStyle(13, FontWeight.w400, AppColors.darkColor),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

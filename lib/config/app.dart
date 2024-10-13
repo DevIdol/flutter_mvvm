@@ -30,13 +30,14 @@ class MyApp extends HookConsumerWidget {
             }, [user]);
 
             return HomePage(
-              userId: user.uid,
+              authUser: user,
             );
           } else {
             return const SignInPage();
           }
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.primaryColor)),
         error: (error, stack) =>
             const Center(child: Text('Something is Wrong!')),
       ),

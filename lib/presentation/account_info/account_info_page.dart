@@ -295,7 +295,8 @@ class AccountInfoPage extends HookConsumerWidget {
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor)),
           error: (error, stackTrace) => Center(child: Text('Error: $error')),
         ),
       ),
