@@ -3,14 +3,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../config/config.dart';
+import '../../repository/todo_repo.dart';
 import '../../repository/user_repo.dart';
 import '../../utils/utils.dart';
 import 'auth_state.dart';
 
 class AuthStateNotifier extends StateNotifier<AuthState> {
-  AuthStateNotifier(this._userRepository) : super(const AuthState());
+  AuthStateNotifier(this._userRepository, this._todoRepository)
+      : super(const AuthState());
 
   final BaseUserRepository _userRepository;
+  final BaseTodoRepository _todoRepository;
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
   // Registration with email/password
@@ -143,6 +146,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         await currentUser.reauthenticateWithProvider(provider);
       }
 
+      // Delete all todos for this user
+      await _todoRepository.deleteTodosByUserId(currentUser.uid);
+
       // Delete user data from Firestore
       await _userRepository.deleteUser(userId: currentUser.uid);
 
@@ -160,10 +166,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 final authNotifierProvider =
     StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
-  return AuthStateNotifier(userRepository);
+  final todoRepository = ref.watch(todoRepositoryProvider);
+  return AuthStateNotifier(userRepository, todoRepository);
 });
 
 final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
   return ref.watch(userRepositoryProvider).authUserStream();
 });
-

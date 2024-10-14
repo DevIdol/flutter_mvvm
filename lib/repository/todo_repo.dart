@@ -13,6 +13,7 @@ abstract class BaseTodoRepository {
   Future<void> upsertTodo(Todo todo);
   Future<void> deleteTodo(String todoId);
   Future<void> deleteTodos(List<String> todoIds);
+  Future<void> deleteTodosByUserId(String userId);
 }
 
 final todoRepositoryProvider = Provider<TodoRepositoryImpl>(
@@ -123,6 +124,24 @@ class TodoRepositoryImpl implements BaseTodoRepository {
       await batch.commit();
     } catch (error) {
       logger.e('Error deleting todos: $error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteTodosByUserId(String userId) async {
+    try {
+      final querySnapshot =
+          await _todoCollection.where('userId', isEqualTo: userId).get();
+
+      final batch = FirebaseFirestore.instance.batch();
+      for (var doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      logger.i('Successfully deleted all todos for userId: $userId');
+    } catch (error) {
+      logger.e('Error deleting todos for userId $userId: $error');
       rethrow;
     }
   }

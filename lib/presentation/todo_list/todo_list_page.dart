@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm/widgets/common_dialog.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../data/data.dart';
@@ -19,7 +20,7 @@ class TodoListPage extends HookConsumerWidget {
       body: Column(
         children: [
           if (todoListState.selectedTodoIds.isNotEmpty)
-            _buildSelectionToolbar(ref),
+            _buildSelectionToolbar(context, ref),
           Expanded(
             child: todoListState.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -33,7 +34,7 @@ class TodoListPage extends HookConsumerWidget {
     );
   }
 
-  Widget _buildSelectionToolbar(WidgetRef ref) {
+  Widget _buildSelectionToolbar(BuildContext context, WidgetRef ref) {
     return Container(
       color: AppColors.greyColor,
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -59,17 +60,27 @@ class TodoListPage extends HookConsumerWidget {
             padding: const EdgeInsets.only(right: 14),
             child: IconButton(
               icon: const Icon(Icons.delete, color: AppColors.errorColor),
-              onPressed: () {
-                if (ref
-                    .watch(todoListNotifierProvider)
-                    .selectedTodoIds
-                    .isNotEmpty) {
-                  ref
-                      .read(todoListNotifierProvider.notifier)
-                      .deleteSelectedTodos();
-                } else {
-                  ref.read(todoListNotifierProvider.notifier).clearSelection();
-                }
+              onPressed: () async {
+                await showConfirmDialog(
+                    context: context,
+                    message: 'Are you sure to delete?',
+                    okFunction: () => {
+                          if (ref
+                              .watch(todoListNotifierProvider)
+                              .selectedTodoIds
+                              .isNotEmpty)
+                            {
+                              ref
+                                  .read(todoListNotifierProvider.notifier)
+                                  .deleteSelectedTodos(),
+                            }
+                          else
+                            {
+                              ref
+                                  .read(todoListNotifierProvider.notifier)
+                                  .clearSelection(),
+                            }
+                        });
               },
             ),
           ),
